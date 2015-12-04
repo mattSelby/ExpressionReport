@@ -1,0 +1,503 @@
+---
+title: "Expression Report: Version 1"
+author: "Shelby"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+ 
+geometry: left=2cm, right = 2cm,  top = 2cm, bottom =2cm
+---
+
+```{r, label = 'Load_Data', echo =FALSE, include = FALSE}
+
+
+# this bit loads all the data require....it will take a while
+source(paste0(script.location,"loadData.R"))
+
+
+#db <- "/home/data/pbt/RNASeq/report_data/MB_20_April_2015"
+loadData(db, load.variant.df = TRUE)
+
+
+```
+
+```{r,label='HGNC_ID_gene.of.interest', echo =FALSE, include=FALSE}
+#gene.of.interest<-"ENSG00000136997"
+#group.of.interest<-"all"
+#subgroup.include <- "all"
+#standard.scale <- FALSE
+#include.nos <- FALSE
+#clin.stats <- clin.stats
+#output.directory <- "/home/shelby/report/knitr/test/"
+#script.location <- "~/report/script/"
+
+# retrieves the hgnc.id
+source(paste0(script.location,"getHgncId.R"))
+getHgncID(gene.of.interest)
+
+# this creates all the out directories
+
+dir.create(paste0(output.dirname,"/Expression/ASE"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Transcripts/Isoform"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Transcripts/TSS"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Transcripts/CDS"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Fusions"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Variants"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/Survival"), recursive = TRUE)
+dir.create(paste0(output.dirname,"/ClinicalFeats"), recursive = TRUE)
+
+
+```
+
+```{r,label="Load_Scripts", echo =FALSE, include=FALSE}
+#loads up all of the scripts neeeded for the plotting
+source(paste0(script.location, "LogSinker.R"))
+source(paste0(script.location,"exprSubgrPlot.R"))
+source(paste0(script.location,"exprClin.R"))
+source(paste0(script.location,"exprSurvivalPlot.R"))
+source(paste0(script.location,"plotTranscripts.R"))
+source(paste0(script.location,"variantFilterer.R"))
+source(paste0(script.location,"fusions.R"))
+source(paste0(script.location,"ase.R"))
+
+
+```
+
+
+#***Gene of Interest: `r hgnc.id` (`r gene.of.interest`)***
+
+---
+
+\begin{center}
+\huge Expression Data
+\end{center}
+
+---
+
+
+```{r, label = 'expr_subgroup', echo =FALSE, fig.width = 9, fig.height = 8}
+
+exprs.data.table<-exprSubgrpPlot(gene.of.interest, group.of.interest = group.of.interest, subgroup.include = subgroup.include, hgnc.id, annot, vsd, include.nos = include.nos,standard.scale = standard.scale, output.dirname) 
+write.csv(x = exprs.data.table, paste0(output.dirname,"/Expression/",hgnc.id, "Output.csv"))
+
+
+
+```
+
+
+```{r, label = 'clin_feat', echo =FALSE, fig.width = 14, fig.height = 14, results = 'asis'}
+
+
+clin.feat.space<-gsub("_", " ", clin.feat)
+cat("\\newpage ")
+cat("\\begin{center}  ")
+cat("\\huge Expression vs. Clinical Features:  ")
+cat("\\newline ")
+cat("\\end{center}")
+for(i in 1:length(clin.feat.space)){
+  
+cat(paste0("\\small ", i,". ", clin.feat.space[i], " \\newline"))  
+  
+}
+
+cat("\\newpage ")
+cat("\\large Expression vs. Clinical Features:  ")
+cat("\\newline ")
+cat("\\newline ")
+cat("\\newline ")
+
+clin.output<-list()
+
+
+layout(matrix(1:4, nrow = 2, ncol =2))
+for (i in seq(1,length(clin.feat),4)){
+
+
+clin.output[[i]]<-exprClinicalPlot(clin.feat[i], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)
+
+clin.output[[i+1]]<-exprClinicalPlot( clin.feat[i+1], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname) 
+
+clin.output[[i+2]]<-exprClinicalPlot( clin.feat[i+2], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+
+clin.output[[i+3]]<-exprClinicalPlot( clin.feat[i+3], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+
+}
+
+for (i in 1:length(clin.output)){
+  
+write.csv(x = clin.output[[i]], file = paste0(output.dirname,"/ClinicalFeats/", hgnc.id,"Output", clin.feat[i], ".csv"))  
+  
+  
+}
+
+
+```
+
+\newpage
+
+```{r, label = 'exprs_surv', echo =FALSE, fig.width = 8, fig.height = 8, results = 'asis', warning= FALSE}
+
+#surv.plots<-c("all", "WNT", "SHH", "Grp3", "Grp4")
+
+
+for (i in 1:length(surv.plots)) {
+if(i ==1 ){
+  
+surv.cont <- FALSE
+
+} else {
+  
+surv.cont <- TRUE  
+  
+}
+surv.data.table<-exprSurvivalPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]], include.nos = include.nos, flag.limit = flag.limit, output.dirname = output.dirname, cont = surv.cont)
+write.csv(x = surv.data.table, paste0(output.dirname,"/Survival/",hgnc.id, "Output.csv"))
+
+cat(paste0("\n\n\n\\large Results from categorical and continuous COX modelling (", paste0(surv.plots[[i]], collapse = ", "),"): "))
+cat("\\normalsize")
+output.table<-exprCoxPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]],include.nos = include.nos, output.dirname = output.dirname,flag.limit = flag.limit, cont = surv.cont)
+cat("\n\n\n")
+print(kable(output.table, digits=3))
+cat("\n\n\n")
+
+
+}
+```
+
+
+
+\blandscape
+```{r, label = 'isoform_plot', echo =FALSE, fig.width = 18, fig.height = 13, results = 'asis'}
+
+output.for.isoforms<-sortVariantData(subgroup.include = subgroup.include, include.nos = include.nos,
+                                      gene.of.interest.isoform.fpkm = gene.of.interest.isoform.fpkm, 
+                                        gene.of.interest.cds.fpkm = gene.of.interest.cds.fpkm, 
+                                       gene.of.interest.tss.fpkm = gene.of.interest.tss.fpkm, 
+                                       gene.of.interest.isoform.attr = gene.of.interest.isoform.attr,
+                                        output.dirname = output.dirname
+                                      )
+
+if(!any(is.na(output.for.isoforms[[1]]))){
+  
+write.csv(x = output.for.isoforms[[1]], paste0(output.dirname,"/Transcripts/Isoform/",hgnc.id, "IsoformOutput.csv"))
+
+  
+plotData(data = output.for.isoforms[[1]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index=output.for.isoforms[[4]],
+          multi=FALSE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest,
+          output.dirname = output.dirname
+          )
+}
+
+
+```
+\elandscape
+
+```{r, label = 'isoform_multi', echo =FALSE, results = 'asis', fig.width = 11, fig.height = 11}
+if(!any(is.na(output.for.isoforms[[1]]))){
+
+
+plotData(data = output.for.isoforms[[1]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index = output.for.isoforms[[4]],
+          multi = TRUE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest,
+          output.dirname = output.dirname
+          )
+
+
+}
+```
+
+\blandscape
+```{r, label = 'isoform_bars', fig.width = 16, fig.height = 10, echo =FALSE, results = 'asis' }
+if(!any(is.na(output.for.isoforms[[1]]))){
+plotBarData(output.for.isoforms[[1]], output.for.isoforms[[6]], output.dirname = output.dirname)
+}
+```
+\elandscape
+
+\blandscape
+```{r, label = 'trans_by_trans', fig.width = 16, fig.height = 10, echo =FALSE , results="asis"}
+
+
+gencode.gtf[grep(gene.of.interest, gencode.gtf$gene_id),] -> gencode.gene.of.interest
+as.data.frame(findOverlaps(grange.all.vars,gencode.gene.of.interest)) -> overlaps
+nmb.all.vars.filt[overlaps[,1],] -> all.vars.gene.of.interest
+
+assign(paste0(hgnc.id,"Gencode"), gencode.gene.of.interest)
+save(list = paste0(hgnc.id,"Gencode"), file = paste0(output.dirname,"/Variants/",hgnc.id, "Gencode.RData"))
+write.csv(x = all.vars.gene.of.interest, paste0(output.dirname,"/Variants/",hgnc.id, "Variants.csv"))
+
+
+
+filteringAnno(all.vars.gene.of.interest, filters.include = c("X1000g.filt",
+                                                      "cg46.filt",
+                                                      "esp6500si_all.filt",
+                                                      "depth.filt",
+                                                      "perc.filt",
+                                                      "NS.filt")) -> variants.ns
+
+filteringAnno(all.vars.gene.of.interest, filters.include = c("X1000g.filt",
+                                                      "cg46.filt",
+                                                      "esp6500si_all.filt",
+                                                      "depth.filt","poly.a.filt",
+                                                      "perc.filt")) -> variants.syn
+
+
+variants.ns[!duplicated(variants.ns),] -> dedup.variants.ns
+variants.syn[!duplicated(variants.syn),] -> dedup.variants.syn
+
+
+if(nrow(dedup.variants.ns)>0){
+write.csv(x = dedup.variants.ns, paste0(output.dirname,"/Variants/",hgnc.id, "NS.csv"))
+}
+if(nrow(dedup.variants.syn)>0){
+write.csv(x = dedup.variants.syn, paste0(output.dirname,"/Variants/",hgnc.id, "SYN.csv"))
+}
+
+
+
+
+```
+\elandscape
+
+\blandscape
+
+```{r, label = 'trans_by_iso', fig.width = 16, fig.height = 10, echo =FALSE , results="asis"}
+if(!any(is.na(output.for.isoforms[[1]]))){
+variant.table<-plotTranscripts(gene.of.interest, color.by= 'transcript', variants = TRUE)
+}
+```
+\elandscape
+
+
+
+```{r , label = 'variant_table', echo =FALSE, results = 'asis'}
+
+cat("\\begin{center}")
+cat(paste0("\\huge Variants for: ",hgnc.id))
+cat("\\end{center}")
+
+
+if(!is.null(variant.table)){
+
+cat("\\normalsize")
+
+
+variant.table[,1] <- paste0("\n\n[", variant.table[,1],"](",paste0("http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=", variant.table[,2], "%3A", as.numeric(variant.table[,3])-2000, "-", as.numeric(variant.table[,4])+2000, "&hgsid=447717037_yn6TgO7346K7iAggW1vSYaUVRegQ)"))
+  
+print(kable(variant.table, align = "c"))
+
+} else {
+  
+cat("\\normalsize No variants found")
+
+}
+```
+
+
+
+<!-- FROM HERE ARE THE TSS VS SUBGROUP --> 
+
+
+\blandscape
+```{r, label = 'tss_plot', echo =FALSE, fig.width = 18, fig.height = 13, results = 'asis'}
+if(!any(is.na(output.for.isoforms[[2]]))){
+
+write.csv(x = output.for.isoforms[[2]], paste0(output.dirname,"/Transcripts/TSS/",hgnc.id, "TSSOutput.csv"))  
+  
+plotData(data = output.for.isoforms[[2]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index=output.for.isoforms[[4]],
+          multi=FALSE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest
+          )
+}
+```
+\elandscape
+
+
+```{r, label = 'tss_multi', echo =FALSE, results = 'asis', fig.width = 11, fig.height = 11}
+if(!any(is.na(output.for.isoforms[[2]]))){
+
+
+plotData(data = output.for.isoforms[[2]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index = output.for.isoforms[[4]],
+          multi = TRUE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest,
+          output.dirname = output.dirname
+          )
+
+
+
+}
+
+```
+
+\blandscape
+```{r, label = 'tss_bars', fig.width = 16, fig.height = 10, echo =FALSE, results = 'asis'}
+if(!any(is.na(output.for.isoforms[[2]]))){
+plotBarData(output.for.isoforms[[2]], output.for.isoforms[[6]], output.dirname = output.dirname)
+}
+```
+\elandscape
+
+\blandscape
+
+```{r, label = 'trans_by_tss', fig.width = 16, fig.height = 10, echo =FALSE }
+if(!any(is.na(output.for.isoforms[[2]]))){
+quiet<-plotTranscripts(gene.of.interest, color.by= 'tss', variants = FALSE)
+}
+```
+\elandscape
+
+
+
+<!-- FROM HERE ARE THE CDS VS SUBGROUP --> 
+
+
+\blandscape
+```{r, label = 'cds_plot', echo =FALSE, fig.width = 18, fig.height = 13, results = 'asis'}
+if(!any(is.na(output.for.isoforms[[3]]))){
+  
+write.csv(x = output.for.isoforms[[3]], paste0(output.dirname,"/Transcripts/CDS/",hgnc.id, "CDSOutput.csv"))
+    
+plotData(data = output.for.isoforms[[3]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index=output.for.isoforms[[4]],
+          multi=FALSE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest
+          )
+}
+```
+\elandscape
+
+```{r, label = 'cds_multi', echo =FALSE, results = 'asis', fig.width = 11, fig.height = 11}
+if(!any(is.na(output.for.isoforms[[3]]))){
+
+  
+plotData(data = output.for.isoforms[[3]],
+          sample.names= output.for.isoforms[[5]],
+          subgroup = output.for.isoforms[[6]],
+          keep.index = output.for.isoforms[[4]],
+          multi = TRUE,
+          standard.scale = standard.scale,
+          group.of.interest = group.of.interest,
+          output.dirname = output.dirname
+          )
+
+                
+
+}
+```
+
+\blandscape
+```{r, label = 'cds_bars', fig.width = 16, fig.height = 10, echo =FALSE, results = 'asis'}
+if(!any(is.na(output.for.isoforms[[3]]))){
+plotBarData(output.for.isoforms[[3]], output.for.isoforms[[6]], output.dirname = output.dirname)
+}
+```
+\elandscape
+
+\blandscape
+```{r, label = 'trans_by_cds', fig.width = 16, fig.height = 10, echo =FALSE }
+if(!any(is.na(output.for.isoforms[[3]]))){
+quiet<-plotTranscripts(gene.of.interest, color.by= 'cds', variants = FALSE)
+}
+```
+\elandscape
+
+\blandscape
+
+
+```{r, label = 'fusions', echo =FALSE, results = 'asis'}
+#outdir= "/home/shelby/report/"
+#SOAPdir = "/home/dan/SOAP/output"
+fusion.output.list<-fusionMaker(mb.fusions.short = mb.fusions.short, hgnc.id = hgnc.id, cutoff = cutoff, SOAPdir = SOAPdir, output.dirname = output.dirname)
+quiet<-lapply(fusion.output.list[[3]], unTarGetSvg, outdir = paste0(output.dirname,"/Fusions"), search.params = fusion.output.list[[2]], SOAPdir = SOAPdir )
+
+#cat("\\blandscape")
+cat("\\begin{center}")
+cat(paste0("\\huge Fusions for: ",hgnc.id))
+cat("\\end{center}")
+
+cat("\\footnotesize")
+
+if(length(fusion.output.list[[1]])>0){ 
+  
+print(kable(fusion.output.list[[1]], align = "c", format = 'pandoc'))
+  
+
+
+write.csv(x = fusion.output.list[[1]], paste0(output.dirname,"/Fusions/", hgnc.id, "FusionOutput.csv"))
+  
+}
+
+
+
+
+
+if(length(fusion.output.list[[1]])>0){
+  
+cat(paste0('
+        
+\\large Output folder: (', '"*', paste0(output.dirname,"/Fusions"),'*")'))
+
+} else {
+  
+cat("\\large No Fusions Found")
+  
+}
+
+
+
+```
+
+
+\elandscape
+
+\blandscape
+\begin{center}
+\huge Allele Specific Expression for `r hgnc.id`
+\newline
+\end{center}
+```{r, label = 'ASE', echo = FALSE, fig.width = 12, fig.height = 10, results = 'asis'}
+
+
+
+ase.output<-aseTableCreator(gene.of.interest = gene.of.interest, output.dirname = output.dirname, ase.data = ase.data, subgroup.include = subgroup.include, include.nos = include.nos)
+if(sum(as.numeric(ase.output))==0){
+  
+  cat("\\large No ASE Found")
+  
+} else {
+  
+cat("\\newline")
+kable(ase.output, align = "c")
+
+}
+
+```
+
+\elandscape
+
+
+
+
+
