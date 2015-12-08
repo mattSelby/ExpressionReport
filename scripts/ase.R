@@ -58,7 +58,7 @@ aseTableCreator <- function(gene.of.interest, output.dirname = output.dirname, a
       
       # work out which subgroup to include in the analysis
       if (subgroup.include == "all") {
-        c("WNT","SHH","Grp3","Grp4") -> temp.subgroup.include
+        subgroup.data  -> temp.subgroup.include
         
       } else {
         subgroup.include -> temp.subgroup.include
@@ -81,7 +81,7 @@ aseTableCreator <- function(gene.of.interest, output.dirname = output.dirname, a
       gene.of.interest.ase <- gene.of.interest.ase[!is.na(gene.of.interest.ase)]
       
       if (subgroup.include == "all") {
-        c("WNT","SHH","Grp3","Grp4","NOS") -> temp.subgroup.include
+        c(subgroup.data ,"NOS") -> temp.subgroup.include
       } else {
         subgroup.include -> temp.subgroup.include
         
@@ -105,25 +105,14 @@ aseTableCreator <- function(gene.of.interest, output.dirname = output.dirname, a
     
     # this set of ifs make the colour scheme
     # hard coded but can be manually changed if pastels aren't your thing
-    sbgrp.col <- c()
-    if (any(levels(subgroup) == "Other")) {
-      sbgrp.col  <- "grey"
-    }
-    if (any(levels(subgroup) == "WNT")) {
-      sbgrp.col  <- c(sbgrp.col,"steelblue2")
-    }
-    if (any(levels(subgroup) == "SHH")) {
-      sbgrp.col <- c(sbgrp.col,"tomato3")
-    }
-    if (any(levels(subgroup) == "Grp3")) {
-      sbgrp.col <- c(sbgrp.col,"gold1")
-    }
-    if (any(levels(subgroup) == "Grp4")) {
-      sbgrp.col <- c(sbgrp.col,"darkolivegreen1")
-    }
-    if (any(levels(subgroup) == "NOS")) {
-      sbgrp.col <- c(sbgrp.col,"grey")
-    }
+    
+    sbgrp.col <- unlist(lapply(X = subgroup.data, function(x, temp.sbgrp.col){
+      
+      temp.sbgrp.col  <- c(temp.sbgrp.col,subgroup.colours[[which(x == names(subgroup.colours))]])
+      
+    }, temp.sbgrp.col <- c()))
+    
+    
     
     # create the two output vectors
     ratios <- c()

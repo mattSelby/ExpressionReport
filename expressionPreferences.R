@@ -1,6 +1,6 @@
 #
 # The preferences file is used to specify input/plotting data to the report
-# script, it is set to a deault that produces reports for all subgroups but can
+# script, it is set to a default that produces reports for all subgroups but can
 # be altered for a more bespoke report
 #
 # There are three sections below:
@@ -9,9 +9,29 @@
 #
 # DATA TO INCLUDE IN THE REPORT
 #
+{
 # These preferences allow the user to specify which data to compare/include
 # within the report
 #
+
+
+#
+# Subgroup Information
+#
+# In the case of medulloblastoma this is set for the four subgroups but these
+# can be changed to suit the data that has been input
+# 
+
+
+#
+# Subgroups sets the list of subgroups, these must be written exactly the same
+# as in the annotation file, the order of these subgroups also determines the
+# order you will plot them in on the graphs
+#
+
+subgroup.data <- c("WNT", "SHH", "Grp3", "Grp4")
+
+
 
 
 #
@@ -230,9 +250,15 @@ clin.stats <- list(
 )
 
 
+
+}
+
+
+
 #
-# SCALES AND LIMITS
+# SCALES, COLOURS AND LIMITS
 #
+{
 # This section allows the user to change the plotting scales?! and also limits
 # for a couple of scripts
 #
@@ -263,10 +289,52 @@ flag.limit <- .75
 standard.scale <- FALSE
 
 
+#
+# Colour Information
+#
+# All colours have defaults in the report but if changes are required the lists
+# below can be altered
+#
+
+#
+# Subgroups colours is used to determine plotting colours later in the scripts,
+# these are default to a lovely pastel palette but can be changed here. These
+# also contain colours for Other and NOS which are currently set to grey
+#
+# This is a named list, the subgroup must always be on the right, then an
+# equals, then the colour for that subgroup
+
+subgroup.colours <- list(
+  
+  "WNT" = "steelblue2",
+  "SHH" = "tomato3",
+  "Grp3" = "gold1",
+  "Grp4" = "darkolivegreen1",
+  "Other" = "grey",
+  "NOS" = "grey"
+  
+)
+
+# 
+# Clinical colours are used to set the two colours which generate a colour scale
+# for each of the clincal feature plots
+#
+
+clinical.colours <- c("light salmon","firebrick")
+
+#
+# KM colours (kaplan meier) set the colours for the two lines on the KM curves
+#
+
+km.colours <- c("red", "blue")
+
+}
+
 
 #
 # DATA INPUT
 #
+{
 # This section holds locations of data files to be imported, this is used to
 # update data sets and gives folder locations for data to be imported.
 # It also contains the location of the folder containing plotting scripts
@@ -297,4 +365,7 @@ SOAPdir = "/home/dan/SOAP/output"
 # ONCE, WHEN AN UPDATE IS APPLIED THE LAOD DATA SCIRPT WILL NEED ALTERING TO
 # GENERATE THESE DATA STRUCTURES
 #
+
 db <- "/home/data/pbt/RNASeq/report_data/MB_20_April_2015"
+
+}

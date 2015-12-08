@@ -124,7 +124,7 @@ sortVariantData <- function(subgroup.include = "all", gene.of.interest.isoform.f
   
   # assigns subgroup and sample name data
     annot$Group -> subgroup
-    annot$Index -> sample_name
+    annot$Index -> sample.name
     
     # this bit will remove any nos samples and prune all the relveant data
     if (include.nos == FALSE) {
@@ -154,11 +154,11 @@ sortVariantData <- function(subgroup.include = "all", gene.of.interest.isoform.f
     } else if (include.nos == TRUE) {
       # this is for include NOS and all subgroups
       subgroup <-
-        factor(subgroup,levels = c("WNT","SHH","Grp3","Grp4", "NOS"));1:length(subgroup) -> keep.index
+        factor(subgroup,levels = c(subgroup.data, "NOS"));1:length(subgroup) -> keep.index
     } else {
       # this is for all subgroups
       subgroup <-
-        factor(subgroup,levels = c("WNT","SHH","Grp3","Grp4")); 1:length(subgroup) -> keep.index
+        factor(subgroup,levels = subgroup.data); 1:length(subgroup) -> keep.index
     }
     
     
@@ -286,7 +286,7 @@ sortVariantData <- function(subgroup.include = "all", gene.of.interest.isoform.f
     # add the keep index to the list, slot 4
     output[[4]] <- keep.index
     # add your sample names to the list (- keep index), slot 5
-    output[[5]] <- sample_name[keep.index]
+    output[[5]] <- sample.name[keep.index]
     # add your subgroup to slot 6
     output[[6]] <- subgroup
     

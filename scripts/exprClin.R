@@ -86,7 +86,7 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
     # which subgroup data to include in the analysis and whether NOS are included, also creates the titles
     #
     if (paste0(subgroup.include, collapse = "|") == "all") {
-      c("Grp3","Grp4","WNT","SHH") -> subgroup.include
+      subgroup.data -> subgroup.include
       if (include.nos == TRUE) {
         subgroup.include <- c(subgroup.include, "NOS")
       }
@@ -175,7 +175,7 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
       ax.size = 1
     }
     # function to make a lovely salmon to firebrick gradient...can be changed
-    colfunc <- colorRampPalette(c("light salmon","firebrick"))
+    colfunc <- colorRampPalette(clinical.colours)
     
     ### title and colour
     

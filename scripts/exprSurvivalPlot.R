@@ -60,7 +60,7 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
       
       # sort out the subgroups to include
       if (paste0(subgroup.include, collapse = "|") == "all") {
-        c("WNT","SHH","Grp3","Grp4") -> temp.subgroup.include
+        subgroup.data -> temp.subgroup.include
       } else {
         subgroup.include -> temp.subgroup.include
         
@@ -79,7 +79,7 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
       Index <- annot$Index
       
       if (paste0(subgroup.include, collapse = "|") == "all") {
-        c("WNT","SHH","Grp3","Grp4","NOS") -> temp.subgroup.include
+        c(subgroup.data,"NOS") -> temp.subgroup.include
       } else {
         subgroup.include -> temp.subgroup.include
         
@@ -156,12 +156,12 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
     # hardcoded red blue
     plot(
       KM, xlab = "Time (years)", ylab = "Cumulative Overall Survival", lwd = 2, col =
-        c("red","blue"), main = title
+        km.colours, main = title
     )
     # add the legend
     
     legend(
-      x = "topright", col = c("red","blue"), lwd = 2, legend = levels(as.factor(gene.exp.bin)), bg = "white"
+      x = "topright", col = km.colours, lwd = 2, legend = levels(as.factor(gene.exp.bin)), bg = "white"
     )
     # do a Log-Rank test
     survdiff(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin) -> surv.log.rank
@@ -248,7 +248,7 @@ exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos 
       
       # sort out the subgroups to include
       if (paste0(subgroup.include, collapse = "|") == "all") {
-        c("WNT","SHH","Grp3","Grp4") -> temp.subgroup.include
+        subgroup.data -> temp.subgroup.include
       } else {
         subgroup.include -> temp.subgroup.include
         
@@ -267,7 +267,7 @@ exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos 
       Index <- annot$Index
       
       if (paste0(subgroup.include, collapse = "|") == "all") {
-        c("WNT","SHH","Grp3","Grp4","NOS") -> temp.subgroup.include
+        c(subgroup.data,"NOS") -> temp.subgroup.include
       } else {
         subgroup.include -> temp.subgroup.include
         

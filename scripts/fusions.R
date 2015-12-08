@@ -90,7 +90,7 @@ fusionMaker <- function(mb.fusions.short = mb.fusions.short, hgnc.id = hgnc.id, 
       fusion.output.list <- list()
       fusion.output.list[[1]] <- gene.of.interest.fusion.small
       fusion.output.list[[2]] <- unique(paste0("/", gene.of.interest.fusion$up_gene, "_", gene.of.interest.fusion$dw_gene,"/"))
-      fusion.output.list[[3]] <- dir(SOAPdir)[grep(paste(unique(gene.of.interest.fusion$sample.name),collapse = "|"), dir(SOAPdir))]
+      fusion.output.list[[3]] <- dir(SOAPdir)[grep(paste(unique(gene.of.interest.fusion$sample_name),collapse = "|"), dir(SOAPdir))]
       
       # turn off the sink and return the list
       LogSinker(start = FALSE)

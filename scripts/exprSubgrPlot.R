@@ -67,18 +67,17 @@ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id
       
       # create a list of the included subgroups if it was "all
     } else if (include.nos == TRUE) {
-      subgroup.include <- c("WNT","SHH","Grp3","Grp4", "NOS")
+      subgroup.include <- c(subgroup.data, "NOS")
     } else {
-      subgroup.include <- c("WNT","SHH","Grp3","Grp4")
+      subgroup.include <- subgroup.data
     }
     
     ### sort out which the group of interest are
     
     if (!any(group.of.interest == "all")) {
       # find which groups have been chosen to compare and compare to "other"
-      groups <- c("WNT", "SHH", "Grp3", "Grp4")
       groups <-
-        groups[grep(paste0(group.of.interest, collapse = "|"), groups, invert = TRUE)]
+        subgroup.data[grep(paste0(group.of.interest, collapse = "|"), subgroup.data, invert = TRUE)]
       groups <- paste0(groups, collapse = "|")
       subgroup <- gsub(groups,"Other",subgroup)
       
@@ -148,25 +147,14 @@ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id
     table(subgroup) -> numbers
     names = paste0(levels(subgroup), " (n=", numbers, ")")
     
-    sbgrp.col <- c()
-    if (any(levels(subgroup) == "Other")) {
-      sbgrp.col  <- "grey"
-    }
-    if (any(levels(subgroup) == "WNT")) {
-      sbgrp.col  <- c(sbgrp.col,"steelblue2")
-    }
-    if (any(levels(subgroup) == "SHH")) {
-      sbgrp.col <- c(sbgrp.col,"tomato3")
-    }
-    if (any(levels(subgroup) == "Grp3")) {
-      sbgrp.col <- c(sbgrp.col,"gold1")
-    }
-    if (any(levels(subgroup) == "Grp4")) {
-      sbgrp.col <- c(sbgrp.col,"darkolivegreen1")
-    }
-    if (any(levels(subgroup) == "NOS")) {
-      sbgrp.col <- c(sbgrp.col,"grey")
-    }
+    
+    sbgrp.col <- unlist(lapply(X = subgroup.data, function(x, temp.sbgrp.col){
+      
+      temp.sbgrp.col  <- c(temp.sbgrp.col,subgroup.colours[[which(x == names(subgroup.colours))]])
+      
+    }, temp.sbgrp.col <- c()))
+    
+    
     
     ###plotting happens
     

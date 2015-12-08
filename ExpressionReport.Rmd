@@ -39,14 +39,14 @@ getHgncID(gene.of.interest)
 
 # this creates all the out directories
 
-dir.create(paste0(output.dirname,"/Expression/ASE"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Transcripts/Isoform"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Transcripts/TSS"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Transcripts/CDS"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Fusions"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Variants"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/Survival"), recursive = TRUE)
-dir.create(paste0(output.dirname,"/ClinicalFeats"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Expression/ASE"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Transcripts/Isoform"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Transcripts/TSS"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Transcripts/CDS"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Fusions"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Variants"), recursive = TRUE)
+dir.create(paste0(output.dirname,"Survival"), recursive = TRUE)
+dir.create(paste0(output.dirname,"ClinicalFeats"), recursive = TRUE)
 
 
 ```
@@ -430,7 +430,7 @@ quiet<-plotTranscripts(gene.of.interest, color.by= 'cds', variants = FALSE)
 #outdir= "/home/shelby/report/"
 #SOAPdir = "/home/dan/SOAP/output"
 fusion.output.list<-fusionMaker(mb.fusions.short = mb.fusions.short, hgnc.id = hgnc.id, cutoff = cutoff, SOAPdir = SOAPdir, output.dirname = output.dirname)
-quiet<-lapply(fusion.output.list[[3]], unTarGetSvg, outdir = paste0(output.dirname,"/Fusions"), search.params = fusion.output.list[[2]], SOAPdir = SOAPdir )
+quiet<-lapply(fusion.output.list[[3]], unTarGetSvg, outdir = paste0(output.dirname,"Fusions"), search.params = fusion.output.list[[2]], SOAPdir = SOAPdir )
 
 #cat("\\blandscape")
 cat("\\begin{center}")
@@ -457,7 +457,7 @@ if(length(fusion.output.list[[1]])>0){
   
 cat(paste0('
         
-\\large Output folder: (', '"*', paste0(output.dirname,"/Fusions"),'*")'))
+\\large Output folder: (', '"*', paste0(output.dirname,"Fusions"),'*")'))
 
 } else {
   
