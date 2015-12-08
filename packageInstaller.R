@@ -6,6 +6,8 @@ list.of.packages <- c(
 "reshape2",
 "minfi",
 "rtracklayer",
+"rmarkdown",
+"markdown",
 "knitr",
 "Gviz",
 "GenomicRanges",
