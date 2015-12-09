@@ -178,8 +178,16 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
     cat(surv.p.val)
     
     
+    if (surv.p.val < 0.001 & !is.na(surv.p.val)) {
+      p.text <- "p < 0.001"
+    } else {
+      p.text <- paste("p =" , round(surv.p.val,3))
+    }
+    
+    
+    
     # create the numbers for the plot
-    text(par("usr")[2],0.1,paste("N = ", sum(KM$n)," p =",round(surv.p.val, 3)), adj = 1.1)
+    text(par("usr")[2],0.1,paste("N = ", sum(KM$n)," p =", p.text), adj = 1.1)
     # turn the sink off and return the output
     LogSinker(start = FALSE)
     return(surv.output)
