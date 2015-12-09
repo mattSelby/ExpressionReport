@@ -343,7 +343,7 @@ km.colours <- c("red", "blue")
 # This folder contains all of the plotting scripts required to generate the
 # expression report, currently this will need changing when you first import the
 # report scripts
-script.location <- "/home/shelby/report/finalFolder/scripts/"
+script.location <- "/home/shelby/ExpressionReport/scripts/"
 
 # This folder has the svg fusion output from SOAP to extract if there are
 # fusions found

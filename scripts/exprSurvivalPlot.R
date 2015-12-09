@@ -1,9 +1,9 @@
-exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname ,  cont = FALSE) {
+exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname ,  cont = FALSE) {
     
   #
   #This function creates KM survival plots for all subgroups or individual ones with accompanying statistics
   #
-  # goi = gene of interest ENSEMBL
+  # gene.of.interest = gene of interest ENSEMBL
   # vsd = expression vsd file
   # annot= expression annotation file
   # subgroup.include =  which subgroups to include but used to tell which data is INCLUDED in the plot not for comparison, all, WNT, SHH, Grp3, Grp4
@@ -12,11 +12,13 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
   # hgnc.id = the gene id created earlier
   # flag limit = the limit to give a warning as more than that percentage are not expressed
   #
+  #
   # output.dirname = location for the log file
   # cont = whether to continue the log file or make a new one (when plotting subgroups)
   #
   
   # create/append to the log file
+  
   LogSinker(
       data.type = "Survival", outdir = paste0(output.dirname,"/Survival/"), start = TRUE, cont = cont
     )
@@ -26,7 +28,7 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
   # trim off any .1 from the end of ensembl IDs
   gsub('\\.[0-9]+$', '', rownames(vsd)) -> gene.names
   # find the gene match from the data set and get the expression for that
-  which(goi == gene.names) -> gene.match
+  which(gene.of.interest == gene.names) -> gene.match
 
    # stop if no match found 
     if (length(gene.match) < 1) {
@@ -100,9 +102,9 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
     # currently hard coded to split by median but this will be changing 
     
     # get the median vsd for the gene of interest
-    median(gene.exp[keep.index]) -> median.goi.vsd
+    median(gene.exp[keep.index]) -> median.gene.of.interest.vsd
     # use this to assign either high or low, then make it into a factor
-    ifelse(gene.exp[keep.index] > median.goi.vsd,"high","low") -> gene.exp.bin
+    ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
     factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
     
     # this is the output for records, creates a data frame
@@ -160,6 +162,8 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
     )
     # add the legend
     
+    line(KM)
+    
     legend(
       x = "topright", col = km.colours, lwd = 2, legend = levels(as.factor(gene.exp.bin)), bg = "white"
     )
@@ -181,25 +185,25 @@ exprSurvivalPlot <- function(goi, vsd, annot, subgroup.include = "all", include.
     if (surv.p.val < 0.001 & !is.na(surv.p.val)) {
       p.text <- "p < 0.001"
     } else {
-      p.text <- paste("p =" , round(surv.p.val,3))
+      p.text <- paste(" p =" , round(surv.p.val,3))
     }
     
     
     
     # create the numbers for the plot
-    text(par("usr")[2],0.1,paste("N = ", sum(KM$n)," p =", p.text), adj = 1.1)
+    text(par("usr")[2],0.1,paste("N = ", sum(KM$n), p.text), adj = 1.1)
     # turn the sink off and return the output
     LogSinker(start = FALSE)
     return(surv.output)
   }
 
 
-exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname = output.dirname, cont = FALSE) {
+exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname = output.dirname, cont = FALSE) {
    
   #
   #This function creates Cox models for all subgroups or individual ones with accompanying statistics
   #
-  # goi = gene of interest ENSEMBL
+  # gene.of.interest = gene of interest ENSEMBL
   # vsd = expression vsd file
   # annot= expression annotation file
   # subgroup.include =  which subgroups to include but used to tell which data is INCLUDED in the plot not for comparison, all, WNT, SHH, Grp3, Grp4
@@ -222,7 +226,7 @@ exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos 
     # trim off any .1 from the end of ensembl IDs
     gsub('\\.[0-9]+$', '', rownames(vsd)) -> gene.names
     # find the gene match from the data set and get the expression for that
-    which(goi == gene.names) -> gene.match
+    which(gene.of.interest == gene.names) -> gene.match
     
     # stop if no match found 
     if (length(gene.match) < 1) {
@@ -294,26 +298,36 @@ exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos 
     # currently hard coded to split by median but this will be changing 
     
     # get the median vsd for the gene of interest
-    median(gene.exp[keep.index]) -> median.goi.vsd
+    median(gene.exp[keep.index]) -> median.gene.of.interest.vsd
     # use this to assign either high or low, then make it into a factor
-    ifelse(gene.exp[keep.index] > median.goi.vsd,"high","low") -> gene.exp.bin
+    ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
     factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
     
     #length(which(gene.exp[keep.index] == 0)) / length(gene.exp[keep.index]) -> perc.non.express
     
     
     #### cox model categorical
-    cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin)
+    cat.cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin)
     
     # print the output to log
     cat("\n\nCox model categorical: ", hgnc.id[[1]], "\n\n")
-    print(cox.model)
-    coef <- coef(cox.model)
+    print(cat.cox.model)
+    cat.coef <- coef(cat.cox.model)
     # this output table will be used in the kable to create the plot and massage into the right format
-    output.table <-
-      data.frame(
-        coef = coef, exp.coef = exp(coef), se.coef = summary(cox.model)$coefficients[[3]], z = summary(cox.model)$coefficients[[4]], p.val = summary(cox.model)$coefficients[[5]]
-      )
+    output.table <- data.frame(
+<<<<<<< HEAD
+      "n" = paste0(cat.cox.model$nevent, "/", cat.cox.model$n), 
+      "HR" = round(exp(cat.coef), 3),
+      "CI" = paste0(signif(summary(cat.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cat.cox.model)$conf.int[[4]],3)),
+      "P value" =  signif(summary(cat.cox.model)$coefficients[[5]], 3)
+=======
+      "n" = paste0(cox.model$nevent, "/", cox.model$n), 
+      "HR" = round(exp(coef), 3),
+      "CI" = paste0(signif(summary(cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cox.model)$conf.int[[4]],3)),
+      "P value" =  signif(summary(cox.model)$coefficients[[5]], 3)
+>>>>>>> 7613976b39881b2819ae9d585715297583d2345d
+    )
+    colnames(output.table)[3:4]<- as.character(c("95% CI", "P value"))
     row.names(output.table) <- "High Expression (Cat.)"
     
     
@@ -324,20 +338,35 @@ exprCoxPlot <-  function(goi, vsd, annot, subgroup.include = "all", include.nos 
     #sink()
     
     #### cox model continuous
-    cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp[keep.index])
+    cont.cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp[keep.index])
+    cont.coef <- coef(cont.cox.model)
     
     # print for the log
     cat("\n\nCox model continuous: ", hgnc.id[[1]], "\n\n")
-    print(cox.model)
+    print(cont.cox.model)
     
     #second half of the output table, massage as above
-    output.table2 <-
-      data.frame(
-        coef = coef, exp.coef = exp(coef), se.coef = summary(cox.model)$coefficients[[3]], z = summary(cox.model)$coefficients[[4]], p.val = summary(cox.model)$coefficients[[5]]
-      )
+    output.table2 <- data.frame(
+<<<<<<< HEAD
+      "n" = paste0(cont.cox.model$nevent, "/", cont.cox.model$n), 
+      "HR" = round(exp(cont.coef), 3),
+      "CI" = paste0(signif(summary(cont.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cont.cox.model)$conf.int[[4]],3)),
+      "p value" =  signif(summary(cont.cox.model)$coefficients[[5]], 3)
+=======
+      "n" = paste0(cox.model$nevent, "/", cox.model$n), 
+      "HR" = round(exp(coef), 3),
+      "CI" = paste0(signif(summary(cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cox.model)$conf.int[[4]],3)),
+      "p value" =  signif(summary(cox.model)$coefficients[[5]], 3)
+>>>>>>> 7613976b39881b2819ae9d585715297583d2345d
+    )
+    colnames(output.table2)[3:4]<- as.character(c("95% CI", "P value"))
+    
     row.names(output.table2) <- "High Expression (Cont.)"
     
     large.table <- rbind(output.table,output.table2)
+    
+
+
     
     # return the table
     print(large.table)
