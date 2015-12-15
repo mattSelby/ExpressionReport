@@ -162,7 +162,6 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     )
     # add the legend
     
-    line(KM)
     
     legend(
       x = "topright", col = km.colours, lwd = 2, legend = levels(as.factor(gene.exp.bin)), bg = "white"
