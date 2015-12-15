@@ -315,17 +315,10 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     cat.coef <- coef(cat.cox.model)
     # this output table will be used in the kable to create the plot and massage into the right format
     output.table <- data.frame(
-<<<<<<< HEAD
-      "n" = paste0(cat.cox.model$nevent, "/", cat.cox.model$n), 
-      "HR" = round(exp(cat.coef), 3),
-      "CI" = paste0(signif(summary(cat.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cat.cox.model)$conf.int[[4]],3)),
-      "P value" =  signif(summary(cat.cox.model)$coefficients[[5]], 3)
-=======
-      "n" = paste0(cox.model$nevent, "/", cox.model$n), 
-      "HR" = round(exp(coef), 3),
-      "CI" = paste0(signif(summary(cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cox.model)$conf.int[[4]],3)),
-      "P value" =  signif(summary(cox.model)$coefficients[[5]], 3)
->>>>>>> 7613976b39881b2819ae9d585715297583d2345d
+    "n" = paste0(cat.cox.model$nevent, "/", cat.cox.model$n), 
+    "HR" = round(exp(cat.coef), 3),
+    "CI" = paste0(signif(summary(cat.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cat.cox.model)$conf.int[[4]],3)),
+    "P value" =  signif(summary(cat.cox.model)$coefficients[[5]], 3)
     )
     colnames(output.table)[3:4]<- as.character(c("95% CI", "P value"))
     row.names(output.table) <- "High Expression (Cat.)"
@@ -347,17 +340,10 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     
     #second half of the output table, massage as above
     output.table2 <- data.frame(
-<<<<<<< HEAD
-      "n" = paste0(cont.cox.model$nevent, "/", cont.cox.model$n), 
-      "HR" = round(exp(cont.coef), 3),
-      "CI" = paste0(signif(summary(cont.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cont.cox.model)$conf.int[[4]],3)),
-      "p value" =  signif(summary(cont.cox.model)$coefficients[[5]], 3)
-=======
-      "n" = paste0(cox.model$nevent, "/", cox.model$n), 
-      "HR" = round(exp(coef), 3),
-      "CI" = paste0(signif(summary(cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cox.model)$conf.int[[4]],3)),
-      "p value" =  signif(summary(cox.model)$coefficients[[5]], 3)
->>>>>>> 7613976b39881b2819ae9d585715297583d2345d
+    "n" = paste0(cont.cox.model$nevent, "/", cont.cox.model$n), 
+    "HR" = round(exp(cont.coef), 3),
+    "CI" = paste0(signif(summary(cont.cox.model)$conf.int[[3]] ,3), "-" ,signif(summary(cont.cox.model)$conf.int[[4]],3)),
+    "p value" =  signif(summary(cont.cox.model)$coefficients[[5]], 3)
     )
     colnames(output.table2)[3:4]<- as.character(c("95% CI", "P value"))
     
