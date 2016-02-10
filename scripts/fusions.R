@@ -125,7 +125,7 @@ unTarGetSvg <- function(sample.name = "Sample_NMB166.tar.gz", SOAPdir = "/home/d
         untar(tarfile = sample.name, list = TRUE)[grep(paste0("(?=.*",search.params,")(?=.*.svg)",collapse = "|"), perl = TRUE, untar(tarfile = sample.name, list = TRUE))]
       
       # untar the above only search the names
-      untar(tarfile = sample.name, files = temp.files, exdir = paste0(outdir,"/",sample.name))
+      untar(tarfile = sample.name, files = temp.files, exdir = paste0(path.expand(outdir),"/",sample.name))
       
       #### move the files to clean everything up and delete
       file.rename(from = paste0(outdir,"/",sample.name,"/",temp.files), to = paste0(

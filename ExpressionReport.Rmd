@@ -87,7 +87,7 @@ write.csv(x = exprs.data.table, paste0(output.dirname,"/Expression/",hgnc.id, "O
 ```
 
 
-```{r, label = 'clin_feat', echo =FALSE, fig.width = 14, fig.height = 14, results = 'asis'}
+```{r, label = 'clin_feat', echo =FALSE, fig.width = 14, fig.height = 14, results = 'asis', warning= FALSE}
 
 
 clin.feat.space<-gsub("_", " ", clin.feat)
@@ -96,9 +96,9 @@ cat("\\begin{center}  ")
 cat("\\huge Expression vs. Clinical Features:  ")
 cat("\\newline ")
 cat("\\end{center}")
-for(i in 1:length(clin.feat.space)){
+for(k in 1:length(clin.feat.space)){
   
-cat(paste0("\\small ", i,". ", clin.feat.space[i], " \\newline"))  
+cat(paste0("\\small ", k,". ", clin.feat.space[k], " \\newline"))  
   
 }
 
@@ -110,24 +110,25 @@ cat("\\newline ")
 
 clin.output<-list()
 
-
 layout(matrix(1:4, nrow = 2, ncol =2))
-for (i in seq(1,length(clin.feat),4)){
+for (m in seq(1,length(clin.feat),4)){
 
 
-clin.output[[i]]<-exprClinicalPlot(clin.feat[i], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)
+clin.output[[m]]<-exprClinicalPlot(clin.feat[m], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)
 
-clin.output[[i+1]]<-exprClinicalPlot( clin.feat[i+1], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname) 
+clin.output[[m+1]]<-exprClinicalPlot( clin.feat[m+1], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname) 
 
-clin.output[[i+2]]<-exprClinicalPlot( clin.feat[i+2], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+clin.output[[m+2]]<-exprClinicalPlot( clin.feat[m+2], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
 
-clin.output[[i+3]]<-exprClinicalPlot( clin.feat[i+3], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
-
+clin.output[[m+3]]<-exprClinicalPlot( clin.feat[m+3], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, 
+subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+cat("\n")
 }
 
-for (i in 1:length(clin.output)){
+
+for (h in 1:length(clin.output)){
   
-write.csv(x = clin.output[[i]], file = paste0(output.dirname,"/ClinicalFeats/", hgnc.id,"Output", clin.feat[i], ".csv"))  
+write.csv(x = clin.output[[h]], file = paste0(output.dirname,"/ClinicalFeats/", hgnc.id,"Output", clin.feat[h], ".csv"))  
   
   
 }
@@ -213,7 +214,7 @@ plotData(data = output.for.isoforms[[1]],
           output.dirname = output.dirname
           )
 
-
+cat("\n")
 }
 ```
 
@@ -275,6 +276,9 @@ write.csv(x = dedup.variants.syn, paste0(output.dirname,"/Variants/",hgnc.id, "S
 ```{r, label = 'trans_by_iso', fig.width = 16, fig.height = 10, echo =FALSE , results="asis"}
 if(!any(is.na(output.for.isoforms[[1]]))){
 variant.table<-plotTranscripts(gene.of.interest, color.by= 'transcript', variants = TRUE)
+} else {
+  variant.table<-NULL
+  
 }
 ```
 \elandscape
@@ -342,7 +346,7 @@ plotData(data = output.for.isoforms[[2]],
           output.dirname = output.dirname
           )
 
-
+cat("\n")
 
 }
 
@@ -402,7 +406,7 @@ plotData(data = output.for.isoforms[[3]],
           output.dirname = output.dirname
           )
 
-                
+  cat("\n")              
 
 }
 ```
@@ -426,7 +430,7 @@ quiet<-plotTranscripts(gene.of.interest, color.by= 'cds', variants = FALSE)
 \blandscape
 
 
-```{r, label = 'fusions', echo =FALSE, results = 'asis'}
+```{r, label = 'fusions', echo =FALSE, results = 'asis', warning= FALSE}
 #outdir= "/home/shelby/report/"
 #SOAPdir = "/home/dan/SOAP/output"
 fusion.output.list<-fusionMaker(mb.fusions.short = mb.fusions.short, hgnc.id = hgnc.id, cutoff = cutoff, SOAPdir = SOAPdir, output.dirname = output.dirname)
@@ -471,32 +475,6 @@ cat("\\large No Fusions Found")
 
 
 \elandscape
-
-\blandscape
-\begin{center}
-\huge Allele Specific Expression for `r hgnc.id`
-\newline
-\end{center}
-```{r, label = 'ASE', echo = FALSE, fig.width = 12, fig.height = 10, results = 'asis'}
-
-
-
-ase.output<-aseTableCreator(gene.of.interest = gene.of.interest, output.dirname = output.dirname, ase.data = ase.data, subgroup.include = subgroup.include, include.nos = include.nos)
-if(sum(as.numeric(ase.output))==0){
-  
-  cat("\\large No ASE Found")
-  
-} else {
-  
-cat("\\newline")
-kable(ase.output, align = "c")
-
-}
-
-```
-
-\elandscape
-
 
 
 

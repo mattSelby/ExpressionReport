@@ -12,8 +12,8 @@ ExpressionReport <- function(gene.of.interest, output.dir, output.name = NULL, e
     assign("output.dirname", output.dirname, envir = globalenv())
     
     render(
-      input = expression.script, envir = globalenv(),output_file = paste0(gene.of.interest,"_", output.name, "_", "ExpressionReport.pdf"), output_dir = output.dirname
-    )
+      input = expression.script, envir = globalenv(),output_file = paste0(gene.of.interest,"_", output.name, "_", "ExpressionReport.pdf"), 
+      output_dir = output.dirname, clean = FALSE)
     Sys.time() -> TotTb
     message(paste0("\nTotal Time: ",round(difftime(TotTb,TotTa, units = 'mins'),2),"min\n"))
   }
