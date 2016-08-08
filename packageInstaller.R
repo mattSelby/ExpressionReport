@@ -28,7 +28,8 @@ if(length(new.packages)) {
   
 } else {
   
-  cat("All required packages installed")
+  message("\nAll required packages installed\n")
 }
 
-
+rm(list.of.packages)
+rm(new.packages)
