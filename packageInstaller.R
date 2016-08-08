@@ -1,4 +1,4 @@
-
+# list of packages required to run the expression report
 
 list.of.packages <- c(
 
@@ -17,6 +17,8 @@ list.of.packages <- c(
 
 )
 
+# check against installed packages to see if any need to be installed before running
+
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
 if(length(new.packages)) {
@@ -24,6 +26,9 @@ if(length(new.packages)) {
   source("http://bioconductor.org/biocLite.R")
   biocLite(new.packages)
   
+} else {
+  
+  cat("All required packages installed")
 }
 
 
