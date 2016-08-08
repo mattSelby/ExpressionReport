@@ -1,4 +1,4 @@
-exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id, annot, vsd, subgroup.include = "all", include.nos = FALSE, standard.scale = FALSE, output.dirname) {
+ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id, annot, vsd, subgroup.include = "all", include.nos = FALSE, standard.scale = FALSE, output.dirname) {
     
   #
   # function to create expression vs subgroup plots (VSD)
@@ -76,19 +76,24 @@ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id
     
     if (!any(group.of.interest == "all")) {
       # find which groups have been chosen to compare and compare to "other"
-      groups <-
-        subgroup.data[grep(paste0(group.of.interest, collapse = "|"), subgroup.data, invert = TRUE)]
-      groups <- paste0(groups, collapse = "|")
-      subgroup <- gsub(groups,"Other",subgroup)
-      
+
       # whether to include nos?
-      if (include.nos == FALSE) {
-        which(subgroup == "NOS") -> nos.index
-        subgroup <- subgroup[-nos.index]
-        gene.exp <- gene.exp[-nos.index]
-        nmb.name <- nmb.name[-nos.index]
-        #changeing to factor to sort out the plotting order
-        subgroup <- factor(subgroup,levels = c("Other",group.of.interest))
+     # if (include.nos == FALSE) {
+      #  which(subgroup == "NOS") -> nos.index
+      #  subgroup <- subgroup[-nos.index]
+       # gene.exp <- gene.exp[-nos.index]
+      #  nmb.name <- nmb.name[-nos.index]
+        
+        groups <-
+          subgroup.data[grep(paste0(group.of.interest, collapse = "|"), subgroup.data, invert = TRUE)]
+        groups <- paste0(groups, collapse = "|")
+        subgroup <- gsub(groups,"Other",subgroup)
+        
+        
+      
+      if (include.nos == FALSE) { 
+      #changeing to factor to sort out the plotting order
+      subgroup <- factor(subgroup,levels = c("Other",group.of.interest))
       } else {
         subgroup <- factor(subgroup,levels = c("Other",group.of.interest, "NOS"))
       }
@@ -108,19 +113,22 @@ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id
       #### this bit is for if there is no group.of.interest
       # equivilant to group.of.interest = "all"
       # with nos?
-      if (include.nos == FALSE) {
-        which(subgroup == "NOS") -> nos.index
-        subgroup <- subgroup[-nos.index]
-        gene.exp <- gene.exp[-nos.index]
-        nmb.name <- nmb.name[-nos.index]
+      #if (include.nos == FALSE) {
+       # which(subgroup == "NOS") -> nos.index
+       # subgroup <- subgroup[-nos.index]
+        #gene.exp <- gene.exp[-nos.index]
+        #nmb.name <- nmb.name[-nos.index]
         subgroup <- factor(subgroup,levels = subgroup.include)
         
         
-      } else {
-        subgroup <- factor(subgroup,levels = subgroup.include)
+        if (include.nos == FALSE) { 
+          #changeing to factor to sort out the plotting order
+          subgroup <- factor(subgroup,levels = subgroup.include)
+        } else {
+          subgroup <- factor(subgroup,levels = c(subgroup.include, "NOS"))
+        }
         
-        
-      }
+      
       
       #sort out these titles
       
@@ -145,10 +153,10 @@ exprSubgrpPlot <-  function(gene.of.interest, group.of.interest = "all", hgnc.id
     ### numbers and colours sorted, hardcoded for now
     # how many of each subgroup?
     table(subgroup) -> numbers
-    names = paste0(levels(subgroup), " (n=", numbers, ")")
+    names <- paste0(levels(subgroup), " (n=", numbers, ")")
     
     
-    sbgrp.col <- unlist(lapply(X = subgroup.data, function(x, temp.sbgrp.col){
+    sbgrp.col <- unlist(lapply(X = levels(subgroup), function(x, temp.sbgrp.col){
       
       temp.sbgrp.col  <- c(temp.sbgrp.col,subgroup.colours[[which(x == names(subgroup.colours))]])
       

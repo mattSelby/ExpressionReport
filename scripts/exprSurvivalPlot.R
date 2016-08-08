@@ -158,7 +158,7 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     # hardcoded red blue
     plot(
       KM, xlab = "Time (years)", ylab = "Cumulative Overall Survival", lwd = 2, col =
-        km.colours, main = title
+        km.colours, main = title, mark.time= TRUE 
     )
     # add the legend
     

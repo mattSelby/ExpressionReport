@@ -63,7 +63,7 @@ subgroup.include <- "all"
 # options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 #
 
-group.of.interest <- "all"
+group.of.interest <- "SHH"
 
 
 #
