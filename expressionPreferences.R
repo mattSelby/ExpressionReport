@@ -310,7 +310,7 @@ subgroup.colours <- list(
   "WNT" = "steelblue2",
   "SHH" = "tomato3",
   "Grp3" = "gold1",
-  "Grp4" = "darkolivegreen1",
+  "Grp4" = "darkolivegreen3",
   "Other" = "grey",
   "NOS" = "grey"
   
