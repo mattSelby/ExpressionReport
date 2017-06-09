@@ -360,10 +360,21 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
     # log 2 corrected
     # ensembl is put into the first row
     # data is then melted to make it plotable
+    
+    
+    
     rbind(log2(as.numeric(gene.of.interest.gene.fpkm) + 1)[keep.index],data) -> temp.data
     rownames(temp.data)[1] <- gene.of.interest
+    
+    #rbind(gene.data,data) -> temp.data
+    
+    
+    
+    
+    
     reshape2::melt(temp.data) -> temp
     
+    colnames(temp) <- c("Var1", "Var2", "value")
     # sort out an .1 which are ofund
     levels(temp$Var1) <- gsub('\\.[0-9]+$', '',levels(temp$Var1))
     
@@ -379,8 +390,7 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
     if (!any(group.of.interest == "all")) {
       # add the groups and search to see which subgroup group.of.interest is
       groups <- c("WNT", "SHH", "Grp3", "Grp4")
-      groups <-
-        groups[grep(paste0(group.of.interest, collapse = "|"), groups, invert = TRUE)]
+      groups <- groups[grep(paste0(group.of.interest, collapse = "|"), groups, invert = TRUE)]
       # add pipes inbetween for later searching
       groups <- paste0(groups, collapse = "|")
       # are there NOS in the data, if so add that in
@@ -391,10 +401,10 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         # or just add other to the other levels
         final.level <- c("Other", group.of.interest)
       }
+      
       # search any groups that are need to be changed to other, e.g. if group.of.interest= 
       # Grp3 all others turne to Other
-      temp$Subgroup <-
-        factor(gsub(groups,"Other",temp$Subgroup), levels = final.level)
+      temp$Subgroup <-  factor(gsub(groups,"Other",temp$Subgroup), levels = final.level)
       
       # is there an hgnc.id? then make the title
       # is there a group.of.interest?
@@ -448,25 +458,33 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
     #
     # hardcoded but can be changed
     
-    sbgrp.col <- c()
-    if (any(levels(temp$Subgroup) == "Other")) {
-      sbgrp.col  <- "grey"
-    }
-    if (any(levels(temp$Subgroup) == "WNT")) {
-      sbgrp.col  <- c(sbgrp.col,"steelblue2")
-    }
-    if (any(levels(temp$Subgroup) == "SHH")) {
-      sbgrp.col <- c(sbgrp.col,"tomato3")
-    }
-    if (any(levels(temp$Subgroup) == "Grp3")) {
-      sbgrp.col <- c(sbgrp.col,"gold1")
-    }
-    if (any(levels(temp$Subgroup) == "Grp4")) {
-      sbgrp.col <- c(sbgrp.col,"darkolivegreen1")
-    }
-    if (any(levels(temp$Subgroup) == "NOS")) {
-      sbgrp.col <- c(sbgrp.col,"grey")
-    }
+    #sbgrp.col <- c()
+    #if (any(levels(temp$Subgroup) == "Other")) {
+    #  sbgrp.col  <- "grey"
+    #}
+    #if (any(levels(temp$Subgroup) == "WNT")) {
+    #  sbgrp.col  <- c(sbgrp.col,"steelblue2")
+    #}
+    #if (any(levels(temp$Subgroup) == "SHH")) {
+    #  sbgrp.col <- c(sbgrp.col,"tomato3")
+    #}
+    #if (any(levels(temp$Subgroup) == "Grp3")) {
+    #  sbgrp.col <- c(sbgrp.col,"gold1")
+    #}
+    #if (any(levels(temp$Subgroup) == "Grp4")) {
+    #  sbgrp.col <- c(sbgrp.col,"darkolivegreen1")
+    #}
+    #if (any(levels(temp$Subgroup) == "NOS")) {
+    #  sbgrp.col <- c(sbgrp.col,"grey")
+    #}
+    
+    
+    sbgrp.col <- unlist(lapply(X = levels(temp$Subgroup), function(x, temp.sbgrp.col){
+      
+      temp.sbgrp.col  <- c(temp.sbgrp.col,subgroup.colours[[which(x == names(subgroup.colours))]])
+      
+    }, temp.sbgrp.col <- c()))
+    
     
     # standard scale? see above?
     if (standard.scale == TRUE) {
@@ -491,6 +509,15 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         col = sbgrp.col, ylim = scale,
         at = positions, cex.axis = 1.5, cex.main = 2, xaxt = 'n', las = 2, ylab = "log2(FPKM+1)", main = title
       )
+      
+      
+      darken <- function(color, factor=1.3){
+        col <- col2rgb(color)
+        col <- col/factor
+        col <- rgb(t(col), maxColorValue=255)
+        col
+      }
+      
       # ablines at intervals
       abline(h = seq(0,round(max(scale) / 2) * 2,2), lty = 2)
       
@@ -593,7 +620,7 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
       }
       
       
-      
+     
       # set amrgins
       par(mfrow = c(2,2), mar = c(5,6,5,6))
       
@@ -606,7 +633,8 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         temp$value[grep("^ENSG", temp$Var1)] ~ temp$Subgroup[grep("^ENSG", temp$Var1)], las = 1, col = sbgrp.col,
         ylab = "log2(FPKM+1)", main = gsub(data.type, gene.of.interest, title), ylim = scale
       )
-      
+      stripchart(temp$value[grep("^ENSG", temp$Var1)] ~ temp$Subgroup[grep("^ENSG", temp$Var1)], vertical = TRUE, 
+                 method = "jitter", add = TRUE, pch = 20, col = darken(sbgrp.col))
       # draw a median line on
       abline(h = median(temp$value[grep("^ENSG", temp$Var1)]), lty = 2)
       
@@ -653,7 +681,9 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         cat("\nT Test of ",  gsub(paste0(gene.of.interest, " \\(|) expression"), "", title),":\n\n")
         
         # do the t test and print output
-        t.test(temp$value[grep("^ENSG", temp$Var1)] ~ temp$Subgroup[grep("^ENSG", temp$Var1)]) -> stat
+        try(t.test(temp$value[grep("^ENSG", temp$Var1)] ~ temp$Subgroup[grep("^ENSG", temp$Var1)]), silent = TRUE) -> stat
+
+        if(grep("Error", stat)==0){
         
         print(summary(stat))
         
@@ -676,7 +706,7 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         text(par("usr")[2],median(temp$value[grep("^ENSG", temp$Var1)]) - ((par("usr")[4] -
                                                                               par("usr")[3]) * .1), p.text, adj = -.1)
       }
-      
+      }
       #### Get rid of the ENSG from above to plot the rest, get the names of the rest
       
       temp.noensg <- temp[grep("^ENSG",temp$Var1, invert = TRUE),]
@@ -696,7 +726,8 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
           temp.noensg$value[grep(temp.names[i], temp.noensg$Var1)] ~  temp.noensg$Subgroup[grep(temp.names[i], temp.noensg$Var1)], col = sbgrp.col, main = gsub(data.type, temp.names[i], title),
           ylab = "log2(FPKM+1)", las = 1, ylim = scale
         )
-        
+        stripchart(temp.noensg$value[grep(temp.names[i], temp.noensg$Var1)] ~ temp.noensg$Subgroup[grep(temp.names[i], temp.noensg$Var1)], vertical = TRUE, 
+                   method = "jitter", add = TRUE, pch = 20, col = darken(sbgrp.col))
         # median line
         abline(h = median(temp.noensg$value[grep(temp.names[i], temp.noensg$Var1)]), lty = 2)
         
@@ -745,7 +776,7 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
         } else if (length(unique(temp$Subgroup[grep("^ENSG", temp$Var1)])) == 2) {
           # for two variables do a mr T test, for the sink
           cat("\nT Test of ",  gsub(paste0(gene.of.interest, " \\(|) expression"), "", title),temp.names[i],":\n\n")
-          
+          if(grep("Error", stat)==0){
           # do the test, pull the data out and pretty up
           t.test(temp.noensg$value[grep(temp.names[i], temp.noensg$Var1)] ~ temp.noensg$Subgroup[grep(temp.names[i], temp.noensg$Var1)]) -> stat
           
@@ -769,7 +800,7 @@ plotData <-function(data, sample.names, subgroup, keep.index, standard.scale = T
                  ((par("usr")[4] - par("usr")[3]) * .1), p.text, adj = -.1)
         }
       }
-      
+      }
       # turn the sink off
       LogSinker(start = FALSE)
       
@@ -823,7 +854,7 @@ plotBarData <- function(data, subgroup, output.dirname) {
   }
   
   ###get the proportions and transpose the data
-  t(prop.table(means.subgroup,1)) -> proportions.subgroup
+  try(t(prop.table(means.subgroup,1))) -> proportions.subgroup
   
   # for the sink give the percentages
   cat("\nTranscript Precentages:\n\n")
@@ -910,6 +941,7 @@ plotTranscripts <-  function(gene.of.interest, color.by = "transcript", variants
     ###genome
     # THIS IS HARDCODED BUT MAY NEED CHANGING IN THE FUTURE?
     gen <- "hg19"
+    
     ### ideogram from above parameters with display settings
     itrack <- IdeogramTrack(genome = gen, chromosome = chr)
     displayPars(itrack) <- list(size = 0.5, littleTicks = TRUE)
@@ -1099,4 +1131,22 @@ plotTranscripts <-  function(gene.of.interest, color.by = "transcript", variants
     }
     
     
-  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

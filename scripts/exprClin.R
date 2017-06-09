@@ -101,7 +101,8 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
     } else {
       if (is.character(hgnc.id[1,]) == "TRUE") {
         title = paste0(
-          gene.of.interest," (",hgnc.id,") expression (",paste(subgroup.include, collapse  = ", "),") vs Others"
+          gene.of.interest," (",hgnc.id,") expression (",paste(subgroup.include, collapse  = ", "),") vs ", 
+          gsub("_", " ", clin.feat[p])
         )
       }
       else if (is.character(hgnc.id[1,]) == "FALSE") {
@@ -217,7 +218,7 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
     
     # temp.clin.stats <- list(sex = c("M", "F"))
     # k=1
-    # j=1
+    # j=11
     
     for (k in 1:length(temp.clin.stats)) {
       # create output lists
@@ -256,12 +257,19 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
         
         # this makes sure there are enough to do stat testing
         if (!any(numbers.forStats <= 1)) {
-          t.test(gene.exp.forStats ~ temp.clin.forStats) -> stat
+          
+          try(t.test(gene.exp.forStats ~ temp.clin.forStats, silent=TRUE) -> stat)
+          
+          
+          if (is(stat, "try-error")) {stat <-NA }
+          
           
           # log the stats test
           cat("\n T test performed \n\n")
           
-          print(stat)
+          
+          if(!all(is.na(stat))){
+          (print(stat))
           
           # pull out the values
           stat[[2]] -> df
@@ -281,9 +289,12 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
           mtext(
             paste0(
               "T Test for ", paste0(names.forStats, collapse = " vs. "),  "; ", f.text,", " ,p.text
-            ), at = par("usr")[1], line = -33 + 1 - k, adj = 0, cex = .8
+            ),
+            at = par("usr")[1],
+            line = -33 + 1 - k, 
+            adj = 0, cex = .8
           )
-          
+          } 
         } else {
           
           # this tells you there aren't enough to test in the margin 
@@ -305,13 +316,16 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
         # again check enough numbers are present
         if (!any(numbers.forStats <= 1)) {
           # do the ANOVA
-          aov(gene.exp.forStats ~ temp.clin.forStats) -> stat
-          summary(stat) -> stat.summary
+          try(aov(gene.exp.forStats ~ temp.clin.forStats) -> stat)
+          
+          if (is(stat, "try-error")) {stat <-NA }
+          if(!all(is.na(stat))){
+          try(summary(stat) -> stat.summary)
           
           # output to log file
           cat("\n ANOVA performed \n\n")
           
-          print(stat.summary)
+          try(print(stat.summary))
           
           # pull out the stats and write on  the chart
           stat.summary[[1]]$"F value"[1] -> F
@@ -334,7 +348,7 @@ exprClinicalPlot <-  function(pos,gene.of.interest, hgnc.id, clin.feat, annot, v
               "ANOVA for ", paste0(names.forStats, collapse = " vs. "),  "; ", f.text,", " ,p.text
             ), at = par("usr")[1], line = -33 + 1 - k, adj = 0, cex = .8
           )
-          
+          }
         } else {
           # tell the user there are too few to test
           mtext(

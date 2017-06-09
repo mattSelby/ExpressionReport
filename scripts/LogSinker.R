@@ -32,9 +32,13 @@ LogSinker <-  function(data.type, outdir = outdir, start = TRUE, cont = FALSE) {
         
       }
       
-    } else {
+    
+      } else {
       # turn the sink off
       sink()
       
     }
-  }
+}
+
+
+

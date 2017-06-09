@@ -45,7 +45,7 @@ subgroup.data <- c("WNT", "SHH", "Grp3", "Grp4")
 #  options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 
 
-subgroup.include <- "all"
+subgroup.include <-  c("SHH", "Grp3", "Grp4")
 
 #
 # group of interest: this variable is used to specify whether there is a group of
@@ -87,7 +87,7 @@ include.nos <- FALSE
 # options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 #
 
-surv.plots <- list("all", "WNT", "SHH", "Grp3", "Grp4")
+surv.plots <- list("all", "SHH", "Grp3", "Grp4")
 
 #
 # Clin Feat specifies which of the clinical features from the annotation files
@@ -262,7 +262,9 @@ clin.stats <- list(
 # any number, this takes the data as a percentage
 #
 
-bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
+#bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
+
+bin <- "median"
 
 }
 

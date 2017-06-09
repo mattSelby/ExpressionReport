@@ -1,4 +1,4 @@
-exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname ,  cont = FALSE) {
+exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname , bin,  cont = FALSE) {
     
   #
   #This function creates KM survival plots for all subgroups or individual ones with accompanying statistics
@@ -100,9 +100,33 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     
     ### divide into two ? is this alway appropriate tertiles?
     # currently hard coded to split by median but this will be changing 
-    
+    if(bin == "median"){
     # get the median vsd for the gene of interest
     median(gene.exp[keep.index]) -> median.gene.of.interest.vsd
+    bin.name <- paste0(" Binned by Median (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")     
+    } else if(bin == "mean"){
+    mean(gene.exp[keep.index]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by Mean (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.100"){
+     unname(quantile(gene.exp[keep.index])[5]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 100% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.75") {
+      unname(quantile(gene.exp[keep.index])[4]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 75% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.50") {
+      unname(quantile(gene.exp[keep.index])[3]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 50% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.25") {
+      unname(quantile(gene.exp[keep.index])[2]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 25% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else if(bin == "quart.0") {
+      unname(quantile(gene.exp[keep.index])[1]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 0% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else {
+      max(gene.exp[keep.index])*bin-> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by ", bin, "% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    }
+
     # use this to assign either high or low, then make it into a factor
     ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
     factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
@@ -139,15 +163,14 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     
     # sort out the names
     if (paste0(subgroup.include, collapse = "|") == "all") {
-      title <- paste("Survival for", hgnc.id)
+      title <- paste("Survival for", hgnc.id[1,1], bin.name)
     } else {
       title <-
-        paste0("Survival for ", hgnc.id, " (", paste0(temp.subgroup.include, collapse = ", "),")")
+        paste0("Survival for ", hgnc.id[1,1], " (", paste0(temp.subgroup.include, collapse = ", "),")",bin.name)
     }
     
     # create the Kaplan-Meier
-    KM <-
-      survfit(Surv(time.os[keep.index],status.os[keep.index]) ~ gene.exp.bin, type = "kaplan-meier", conf.type = "log")
+    KM <-      try(survfit(Surv(time.os[keep.index],status.os[keep.index]) ~ gene.exp.bin, type = "kaplan-meier", conf.type = "log"))
     
     # output flag and KM data to log file
     cat("Flag Limit: ", flag.limit, "\n\n")
@@ -156,10 +179,10 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     
     # plot the kaplan-meier plot
     # hardcoded red blue
-    plot(
+    try(plot(
       KM, xlab = "Time (years)", ylab = "Cumulative Overall Survival", lwd = 2, col =
         km.colours, main = title, mark.time= TRUE 
-    )
+    ))
     # add the legend
     
     
@@ -167,13 +190,15 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
       x = "topright", col = km.colours, lwd = 2, legend = levels(as.factor(gene.exp.bin)), bg = "white"
     )
     # do a Log-Rank test
-    survdiff(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin) -> surv.log.rank
+    try(survdiff(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin)) -> surv.log.rank
     
     # output log rank
     cat("\nLog Rank data for: ", hgnc.id[[1]], "\n\n")
-        print(surv.log.rank)
+      print(surv.log.rank)
         
     # add the rounded p-value to the plot
+      
+    if(!is(surv.log.rank, "try-error")){
     1 - pchisq(surv.log.rank$chisq, length(surv.log.rank$obs) - 1) -> surv.p.val
     
     # output the p value
@@ -187,7 +212,7 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
       p.text <- paste(" p =" , round(surv.p.val,3))
     }
     
-    
+    }
     
     # create the numbers for the plot
     text(par("usr")[2],0.1,paste("N = ", sum(KM$n), p.text), adj = 1.1)
@@ -197,7 +222,7 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
   }
 
 
-exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, output.dirname = output.dirname, cont = FALSE) {
+exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all", include.nos = FALSE, hgnc.id = hgnc.id, flag.limit = 0.75, bin, output.dirname = output.dirname, cont = FALSE) {
    
   #
   #This function creates Cox models for all subgroups or individual ones with accompanying statistics
@@ -296,8 +321,33 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     ### divide into two ? is this alway appropriate tertiles?
     # currently hard coded to split by median but this will be changing 
     
-    # get the median vsd for the gene of interest
-    median(gene.exp[keep.index]) -> median.gene.of.interest.vsd
+    if(bin == "median"){
+      # get the median vsd for the gene of interest
+      median(gene.exp[keep.index]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by Median (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")     
+    } else if(bin == "mean"){
+      mean(gene.exp[keep.index]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by Mean (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.100"){
+      unname(quantile(gene.exp[keep.index])[5]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 100% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.75") {
+      unname(quantile(gene.exp[keep.index])[4]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 75% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.50") {
+      unname(quantile(gene.exp[keep.index])[3]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 50% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    } else if(bin == "quart.25") {
+      unname(quantile(gene.exp[keep.index])[2]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 25% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else if(bin == "quart.0") {
+      unname(quantile(gene.exp[keep.index])[1]) -> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by 0% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else {
+      max(gene.exp[keep.index])*bin-> median.gene.of.interest.vsd
+      bin.name <- paste0(" Binned by ", bin, "% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
+    }
+    
     # use this to assign either high or low, then make it into a factor
     ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
     factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
@@ -306,12 +356,12 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     
     
     #### cox model categorical
-    cat.cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin)
+    cat.cox.model <- try(coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp.bin))
     
     # print the output to log
     cat("\n\nCox model categorical: ", hgnc.id[[1]], "\n\n")
     print(cat.cox.model)
-    cat.coef <- coef(cat.cox.model)
+    cat.coef <- try(coef(cat.cox.model))
     # this output table will be used in the kable to create the plot and massage into the right format
     output.table <- data.frame(
     "n" = paste0(cat.cox.model$nevent, "/", cat.cox.model$n), 
@@ -330,8 +380,8 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     #sink()
     
     #### cox model continuous
-    cont.cox.model <- coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp[keep.index])
-    cont.coef <- coef(cont.cox.model)
+    cont.cox.model <- try(coxph(Surv(time.os[keep.index],status.os[keep.index])  ~ gene.exp[keep.index]))
+    cont.coef <- try(coef(cont.cox.model))
     
     # print for the log
     cat("\n\nCox model continuous: ", hgnc.id[[1]], "\n\n")

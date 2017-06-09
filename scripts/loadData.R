@@ -16,6 +16,8 @@ loadData <- function(db, load.variant.df = TRUE) {
   library(survival)
   library(scales)
   library(RColorBrewer)
+  library(AnnotationDbi)
+  library(org.Hs.eg.db)
   
   #source("~/report/script/continue.script.R")
   
@@ -23,18 +25,28 @@ loadData <- function(db, load.variant.df = TRUE) {
   # as a note this is set to automatically load the data into the working environment
   
   # Ensembl load for gene names
-  if (length(grep("^ensembl$", ls(envir = .GlobalEnv))) == 1) {
-    cat("Ensembl Pre Loaded\n")
-  } else {
-    #ensembl = useMart("ensembl",dataset = "hsapiens_gene_ensembl")
-    
-    # hardcoded to hg19, does this need changing somehow?
-    ensembl=useMart(host='feb2014.archive.ensembl.org', biomart='ENSEMBL_MART_ENSEMBL', dataset='hsapiens_gene_ensembl')
-    assign("ensembl", ensembl, .GlobalEnv)
-    cat("Ensembl Loaded\n")
-    
-  }
+  #if (length(grep("^ensembl$", ls(envir = .GlobalEnv))) == 1) {
+  #  cat("Ensembl Pre Loaded\n")
+  #} else {
+  #  #ensembl = useMart("ensembl",dataset = "hsapiens_gene_ensembl")
+  #  
+  #  # hardcoded to hg19, does this need changing somehow?
+  #  ensembl=useMart(host='feb2014.archive.ensembl.org', biomart='ENSEMBL_MART_ENSEMBL', dataset='hsapiens_gene_ensembl')
+  #  assign("ensembl", ensembl, .GlobalEnv)
+  #  cat("Ensembl Loaded\n")
+  #  
+  #}
   
+  convertIDs<- function( ids, fromKey, toKey, db, ifMultiple=c( "putNA", "useFirst" ) ) {
+    stopifnot( inherits( db, "AnnotationDb" ) )
+    ifMultiple <- match.arg(ifMultiple)
+    suppressWarnings( selRes <- AnnotationDbi::select(
+      db, keys=ids, keytype=fromKey, columns=c(fromKey,toKey) ) )
+    if( ifMultiple == "putNA" ) {
+      duplicatedIds <- selRes[ duplicated( selRes[,1] ), 1 ]
+      selRes <- selRes[ ! selRes[,1] %in% duplicatedIds, ] }
+    return( selRes[ match( ids, selRes[,1] ), 2 ] )
+  }
   
 
   

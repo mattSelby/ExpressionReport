@@ -45,7 +45,7 @@ subgroup.data <- c("WNT", "SHH", "Grp3", "Grp4")
 #  options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 
 
-subgroup.include <- "all"
+subgroup.include <- "SHH"
 
 #
 # group of interest: this variable is used to specify whether there is a group of
@@ -63,7 +63,7 @@ subgroup.include <- "all"
 # options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 #
 
-group.of.interest <- "all"
+group.of.interest <- "SHH"
 
 #
 # In the medullo set there are NOS (No Official Subgroup) samples, these by
@@ -187,8 +187,7 @@ clin.stats <- list(
   #
   #  "adult", "child", "infant"
   #
-  Stage_1 = list(c("M0",   "M0/1", "M0/2", "M0/3", "M1"), c("M2",  "M3", "M4")),
-  Stage_2 = list(c("M0",   "M0/1", "M0/2", "M0/3"), c("M1","M2",  "M3", "M4")),
+  Stage = list(c("M0",   "M0/1", "M0/2", "M0/3", "M1"), c("M2",  "M3", "M4")),
   #
   #  "M0",  "M0/1", "M1",  "M2",  "M2/3", "M3", "M4"
   #
@@ -250,19 +249,7 @@ clin.stats <- list(
   #
 )
 
-## The bin allows for customisability of the KM, options are:
-# "median", this is default
-# "mean"
-# "quart.100", 100% quartile
-# "quart.75", 75% quartile
-# "quart.50", 50% quartile
-# "quart.25", 25% quartile
-# "quart.0", 0% quartile
-# 
-# any number, this takes the data as a percentage
-#
 
-bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
 
 }
 

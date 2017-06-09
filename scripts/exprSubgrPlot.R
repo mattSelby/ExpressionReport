@@ -170,8 +170,13 @@
     par(xpd = FALSE)
     # boxplot of expression vs subgroup
     boxplot(
-      gene.exp ~ subgroup, col = sbgrp.col, ylim = scale, ylab = "Expression (VSD)", names = names, main = title
+      gene.exp[!is.na(subgroup)] ~ subgroup[!is.na(subgroup)], col = sbgrp.col, ylim = scale, ylab = "Expression (VSD)", names = names, main = title
     )
+    
+    
+
+    stripchart(gene.exp[!is.na(subgroup)] ~ subgroup[!is.na(subgroup)], vertical = TRUE, 
+               method = "jitter", add = TRUE, pch = 20, col = darken(sbgrp.col))
     # ablind on the median
     abline(h = median(gene.exp), lty = 2)
     # plot outside the margin
