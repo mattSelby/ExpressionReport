@@ -63,8 +63,7 @@ subgroup.include <- "all"
 # options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 #
 
-group.of.interest <- "SHH"
-
+group.of.interest <- "all"
 
 #
 # In the medullo set there are NOS (No Official Subgroup) samples, these by
@@ -188,7 +187,8 @@ clin.stats <- list(
   #
   #  "adult", "child", "infant"
   #
-  Stage = list(c("M0",   "M0/1", "M0/2", "M0/3", "M1"), c("M2",  "M3", "M4")),
+  Stage_1 = list(c("M0",   "M0/1", "M0/2", "M0/3", "M1"), c("M2",  "M3", "M4")),
+  Stage_2 = list(c("M0",   "M0/1", "M0/2", "M0/3"), c("M1","M2",  "M3", "M4")),
   #
   #  "M0",  "M0/1", "M1",  "M2",  "M2/3", "M3", "M4"
   #
@@ -250,7 +250,19 @@ clin.stats <- list(
   #
 )
 
+## The bin allows for customisability of the KM, options are:
+# "median", this is default
+# "mean"
+# "quart.100", 100% quartile
+# "quart.75", 75% quartile
+# "quart.50", 50% quartile
+# "quart.25", 25% quartile
+# "quart.0", 0% quartile
+# 
+# any number, this takes the data as a percentage
+#
 
+bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
 
 }
 
@@ -312,7 +324,8 @@ subgroup.colours <- list(
   "Grp3" = "gold1",
   "Grp4" = "darkolivegreen3",
   "Other" = "grey",
-  "NOS" = "grey"
+  "NOS" = "grey",
+  "CB" = "grey"
   
 )
 
@@ -369,4 +382,15 @@ SOAPdir = "/home/dan/SOAP/output"
 
 db <- "/home/data/pbt/RNASeq/report_data/MB_20_April_2015"
 
+}
+
+convertIDs<- function( ids, fromKey, toKey, db, ifMultiple=c( "putNA", "useFirst" ) ) {
+  stopifnot( inherits( db, "AnnotationDb" ) )
+  ifMultiple <- match.arg(ifMultiple)
+  suppressWarnings( selRes <- AnnotationDbi::select(
+    db, keys=ids, keytype=fromKey, columns=c(fromKey,toKey) ) )
+  if( ifMultiple == "putNA" ) {
+    duplicatedIds <- selRes[ duplicated( selRes[,1] ), 1 ]
+    selRes <- selRes[ ! selRes[,1] %in% duplicatedIds, ] }
+  return( selRes[ match( ids, selRes[,1] ), 2 ] )
 }

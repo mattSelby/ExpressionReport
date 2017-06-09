@@ -34,8 +34,26 @@ loadData(db, load.variant.df = TRUE)
 #script.location <- "~/report/script/"
 
 # retrieves the hgnc.id
-source(paste0(script.location,"getHgncId.R"))
-getHgncID(gene.of.interest)
+#source(paste0(script.location,"getHgncId.R"))
+#getHgncID(gene.of.interest)
+  hgnc.id <- convertIDs(ids = gene.of.interest, fromKey = "ENSEMBL",toKey =  "SYMBOL", db = org.Hs.eg.db
+                        ,ifMultiple="useFirst")
+
+hgnc.id <-as.data.frame(hgnc.id)
+hgnc.id[,1] <- as.character(hgnc.id[,1])
+
+  rownames(hgnc.id)  <- hgnc.id[,1]
+   
+
+    if (length(hgnc.id) > 0) {
+    assign("hgnc.id", hgnc.id, .GlobalEnv)
+    cat("HGNC ID Loaded\n")
+    cat(paste("Gene:", as.character(hgnc.id)))
+    return(hgnc.id)
+    
+  } else {
+    cat("HGNC ID not Found\n")
+  }
 
 # this creates all the out directories
 
@@ -61,6 +79,7 @@ source(paste0(script.location,"plotTranscripts.R"))
 source(paste0(script.location,"variantFilterer.R"))
 source(paste0(script.location,"fusions.R"))
 source(paste0(script.location,"ase.R"))
+source(paste0(script.location,"darken.R"))
 
 
 ```
@@ -79,7 +98,7 @@ source(paste0(script.location,"ase.R"))
 
 ```{r, label = 'expr_subgroup', echo =FALSE, fig.width = 9, fig.height = 8}
 
-exprs.data.table<-exprSubgrpPlot(gene.of.interest, group.of.interest = group.of.interest, subgroup.include = subgroup.include, hgnc.id, annot, vsd, include.nos = include.nos,standard.scale = standard.scale, output.dirname) 
+try(exprs.data.table<-exprSubgrpPlot(gene.of.interest, group.of.interest = group.of.interest, subgroup.include = subgroup.include, hgnc.id, annot, vsd, include.nos = include.nos,standard.scale = standard.scale, output.dirname) )
 write.csv(x = exprs.data.table, paste0(output.dirname,"/Expression/",hgnc.id, "Output.csv"))
 
 
@@ -114,14 +133,14 @@ layout(matrix(1:4, nrow = 2, ncol =2))
 for (m in seq(1,length(clin.feat),4)){
 
 
-clin.output[[m]]<-exprClinicalPlot(clin.feat[m], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)
+try(clin.output[[m]]<-exprClinicalPlot(clin.feat[m], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname))
 
-clin.output[[m+1]]<-exprClinicalPlot( clin.feat[m+1], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname) 
+try(clin.output[[m+1]]<-exprClinicalPlot( clin.feat[m+1], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname) )
 
-clin.output[[m+2]]<-exprClinicalPlot( clin.feat[m+2], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+try(clin.output[[m+2]]<-exprClinicalPlot( clin.feat[m+2], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  )
 
-clin.output[[m+3]]<-exprClinicalPlot( clin.feat[m+3], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, 
-subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  
+try(clin.output[[m+3]]<-exprClinicalPlot( clin.feat[m+3], gene.of.interest, hgnc.id, clin.feat, annot, vsd, include.nos = include.nos, standard.scale = standard.scale, 
+subgroup.include = subgroup.include, clin.stats = clin.stats, output.dirname = output.dirname)  )
 cat("\n")
 }
 
@@ -142,9 +161,17 @@ write.csv(x = clin.output[[h]], file = paste0(output.dirname,"/ClinicalFeats/", 
 
 #surv.plots<-c("all", "WNT", "SHH", "Grp3", "Grp4")
 
+if (paste0(subgroup.include, collapse = "|") == "all") {
+        surv.plots <- surv.plots
+      } else {
+        surv.plots[[grep("all", surv.plots)]] <- subgroup.include
+      }
 
+
+
+for(p in bin){
 for (i in 1:length(surv.plots)) {
-if(i ==1 ){
+if((which(p == bin)+i) == 2 ){
   
 surv.cont <- FALSE
 
@@ -153,18 +180,24 @@ surv.cont <- FALSE
 surv.cont <- TRUE  
   
 }
-surv.data.table<-exprSurvivalPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]], include.nos = include.nos, flag.limit = flag.limit, output.dirname = output.dirname, cont = surv.cont)
-write.csv(x = surv.data.table, paste0(output.dirname,"/Survival/",hgnc.id, "Output.csv"))
+try(surv.data.table<-exprSurvivalPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]], include.nos = include.nos, flag.limit = flag.limit, output.dirname = output.dirname, cont = surv.cont, bin = p))
+write.csv(x = surv.data.table, paste0(output.dirname,"/Survival/",hgnc.id,"_",p,"_", "Output.csv"))
 
 cat(paste0("\n\n\n\\large Results from categorical and continuous COX modelling (", paste0(surv.plots[[i]], collapse = ", "),"): "))
 cat("\\normalsize")
-output.table<-exprCoxPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]],include.nos = include.nos, output.dirname = output.dirname,flag.limit = flag.limit, cont = surv.cont)
+try(output.table<-exprCoxPlot(gene.of.interest,vsd,annot, hgnc.id = hgnc.id, subgroup.include = surv.plots[[i]],include.nos = include.nos, output.dirname = output.dirname,flag.limit = flag.limit, cont = TRUE, bin = p))
 cat("\n\n\n")
-print(kable(output.table, digits=3))
+#print(knitr::kable(output.table, digits=3, format = "pandoc"))
+options(xtable.comment = FALSE)
+print(xtable(as.matrix(output.table),label = NULL, digits = 3))
 cat("\n\n\n")
-
 
 }
+}
+
+
+
+
 ```
 
 
@@ -172,13 +205,13 @@ cat("\n\n\n")
 \blandscape
 ```{r, label = 'isoform_plot', echo =FALSE, fig.width = 18, fig.height = 13, results = 'asis'}
 
-output.for.isoforms<-sortVariantData(subgroup.include = subgroup.include, include.nos = include.nos,
+try(output.for.isoforms<-sortVariantData(subgroup.include = subgroup.include, include.nos = include.nos,
                                       gene.of.interest.isoform.fpkm = gene.of.interest.isoform.fpkm, 
                                         gene.of.interest.cds.fpkm = gene.of.interest.cds.fpkm, 
                                        gene.of.interest.tss.fpkm = gene.of.interest.tss.fpkm, 
                                        gene.of.interest.isoform.attr = gene.of.interest.isoform.attr,
                                         output.dirname = output.dirname
-                                      )
+                                      ))
 
 if(!any(is.na(output.for.isoforms[[1]]))){
   
@@ -274,12 +307,12 @@ write.csv(x = dedup.variants.syn, paste0(output.dirname,"/Variants/",hgnc.id, "S
 \blandscape
 
 ```{r, label = 'trans_by_iso', fig.width = 16, fig.height = 10, echo =FALSE , results="asis"}
-if(!any(is.na(output.for.isoforms[[1]]))){
-variant.table<-plotTranscripts(gene.of.interest, color.by= 'transcript', variants = TRUE)
-} else {
-  variant.table<-NULL
-  
-}
+#if(!any(is.na(output.for.isoforms[[1]]))){
+#variant.table<-plotTranscripts(gene.of.interest, color.by= 'transcript', variants = TRUE)
+#} else {
+#  variant.table<-NULL
+#  
+#}
 ```
 \elandscape
 
@@ -292,20 +325,20 @@ cat(paste0("\\huge Variants for: ",hgnc.id))
 cat("\\end{center}")
 
 
-if(!is.null(variant.table)){
+#if(!is.null(variant.table)){
+#
+#cat("\\normalsize")
+#
+#
+#variant.table[,1] <- paste0("\n\n[", #variant.table[,1],"](",paste0("http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=", variant.table[,2], "%3A", #as.numeric(variant.table[,3])-2000, "-", as.numeric(variant.table[,4])+2000, #"&hgsid=447717037_yn6TgO7346K7iAggW1vSYaUVRegQ)"))
+#  
+#print(kable(variant.table, align = "c"))
+#
+#} else {
+#  
+#cat("\\normalsize No variants found")
 
-cat("\\normalsize")
-
-
-variant.table[,1] <- paste0("\n\n[", variant.table[,1],"](",paste0("http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=", variant.table[,2], "%3A", as.numeric(variant.table[,3])-2000, "-", as.numeric(variant.table[,4])+2000, "&hgsid=447717037_yn6TgO7346K7iAggW1vSYaUVRegQ)"))
-  
-print(kable(variant.table, align = "c"))
-
-} else {
-  
-cat("\\normalsize No variants found")
-
-}
+#}
 ```
 
 
@@ -363,9 +396,9 @@ plotBarData(output.for.isoforms[[2]], output.for.isoforms[[6]], output.dirname =
 \blandscape
 
 ```{r, label = 'trans_by_tss', fig.width = 16, fig.height = 10, echo =FALSE }
-if(!any(is.na(output.for.isoforms[[2]]))){
-quiet<-plotTranscripts(gene.of.interest, color.by= 'tss', variants = FALSE)
-}
+#if(!any(is.na(output.for.isoforms[[2]]))){
+#quiet<-plotTranscripts(gene.of.interest, color.by= 'tss', variants = FALSE)
+#}
 ```
 \elandscape
 
@@ -421,9 +454,9 @@ plotBarData(output.for.isoforms[[3]], output.for.isoforms[[6]], output.dirname =
 
 \blandscape
 ```{r, label = 'trans_by_cds', fig.width = 16, fig.height = 10, echo =FALSE }
-if(!any(is.na(output.for.isoforms[[3]]))){
-quiet<-plotTranscripts(gene.of.interest, color.by= 'cds', variants = FALSE)
-}
+#if(!any(is.na(output.for.isoforms[[3]]))){
+#quiet<-plotTranscripts(gene.of.interest, color.by= 'cds', variants = FALSE)
+#}
 ```
 \elandscape
 
@@ -445,8 +478,9 @@ cat("\\footnotesize")
 
 if(length(fusion.output.list[[1]])>0){ 
   
-print(kable(fusion.output.list[[1]], align = "c", format = 'pandoc'))
-  
+#print(kable(fusion.output.list[[1]], align = "c", format = 'pandoc'))
+options(xtable.comment = FALSE)
+print(xtable(as.matrix(fusion.output.list[[1]]),label = NULL))  
 
 
 write.csv(x = fusion.output.list[[1]], paste0(output.dirname,"/Fusions/", hgnc.id, "FusionOutput.csv"))
