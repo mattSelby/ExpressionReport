@@ -122,15 +122,41 @@ exprSurvivalPlot <- function(gene.of.interest, vsd, annot, subgroup.include = "a
     } else if(bin == "quart.0") {
       unname(quantile(gene.exp[keep.index])[1]) -> median.gene.of.interest.vsd
       bin.name <- paste0(" Binned by 0% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else if(grepl("split", bin) == TRUE){
+      bin.name <- paste0(" Binned by <25%, 25-75% and >75% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")  
     } else {
       max(gene.exp[keep.index])*bin-> median.gene.of.interest.vsd
       bin.name <- paste0(" Binned by ", bin, "% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
     }
+      
 
-    # use this to assign either high or low, then make it into a factor
-    ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
-    factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
+      
+     if(grepl("split", bin)) {
+       
+      low <- strsplit(bin, split = "_")[[1]][2]
+      high <- strsplit(bin, split = "_")[[1]][3]
+      
+      quantiles <- quantile(gene.exp[keep.index])
     
+      quantiles[grep(low, names(quantiles))]
+      quantiles[grep(high, names(quantiles))]
+      
+      unname(quantile(gene.exp[keep.index])[2])
+      
+      gene.exp.bin <- ifelse(gene.exp[keep.index] <  quantiles[grep(low, names(quantiles))],
+             "Low", 
+             ifelse(gene.exp[keep.index] > quantiles[grep(low, names(quantiles))] & quantiles[grep(high, names(quantiles))] < gene.exp[keep.index], 
+                    "Middle", "High"))
+      gene.exp.bin <- factor(gene.exp.bin, levels = c("Low","Middle", "High"))
+
+      bin.name <- paste0(" Binned by <25%, 25-75% and >75% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")     
+       
+       
+     } else {
+    # use this to assign either high or low, then make it into a factor
+    ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"High","Low") -> gene.exp.bin
+    factor(gene.exp.bin, levels = c("Low","High")) -> gene.exp.bin
+     }
     # this is the output for records, creates a data frame
     surv.output <- data.frame(
       PFS = time.pfs[keep.index],
@@ -343,15 +369,39 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     } else if(bin == "quart.0") {
       unname(quantile(gene.exp[keep.index])[1]) -> median.gene.of.interest.vsd
       bin.name <- paste0(" Binned by 0% Quartile (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")   
+    } else if(grepl("split", bin) == TRUE){
+      bin.name <- paste0(" Binned by <25%, 25-75% and >75% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")  
     } else {
       max(gene.exp[keep.index])*bin-> median.gene.of.interest.vsd
       bin.name <- paste0(" Binned by ", bin, "% (", sprintf("%.2f", round(median.gene.of.interest.vsd,2)), ")")      
     }
     
-    # use this to assign either high or low, then make it into a factor
-    ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"high","low") -> gene.exp.bin
-    factor(gene.exp.bin, levels = c("low","high")) -> gene.exp.bin
-    
+    if(grepl("split", bin)) {
+      
+      low <- strsplit(bin, split = "_")[[1]][2]
+      high <- strsplit(bin, split = "_")[[1]][3]
+      
+      quantiles <- quantile(gene.exp[keep.index])
+      
+      quantiles[grep(low, names(quantiles))]
+      quantiles[grep(high, names(quantiles))]
+      
+      unname(quantile(gene.exp[keep.index])[2])
+      
+      gene.exp.bin <- ifelse(gene.exp[keep.index] <  quantiles[grep(low, names(quantiles))],
+                             "Low", 
+                             ifelse(gene.exp[keep.index] > quantiles[grep(low, names(quantiles))] & quantiles[grep(high, names(quantiles))] < gene.exp[keep.index], 
+                                    "Middle", "High"))
+      gene.exp.bin <- factor(gene.exp.bin, levels = c("Low","Middle", "High"))
+      
+         
+      
+      
+    } else {
+      # use this to assign either high or low, then make it into a factor
+      ifelse(gene.exp[keep.index] > median.gene.of.interest.vsd,"High","Low") -> gene.exp.bin
+      factor(gene.exp.bin, levels = c("Low","High")) -> gene.exp.bin
+    }
     #length(which(gene.exp[keep.index] == 0)) / length(gene.exp[keep.index]) -> perc.non.express
     
     
@@ -370,7 +420,9 @@ exprCoxPlot <-  function(gene.of.interest, vsd, annot, subgroup.include = "all",
     "P value" =  signif(summary(cat.cox.model)$coefficients[[5]], 3)
     )
     colnames(output.table)[3:4]<- as.character(c("95% CI", "P value"))
-    row.names(output.table) <- "High Expression (Cat.)"
+    
+
+    rownames(output.table) <- paste0(gsub("gene.exp.bin", "", rownames(output.table)), " Expression (Cat.)")
     
     
     # library(xtable)

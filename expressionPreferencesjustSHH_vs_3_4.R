@@ -45,7 +45,7 @@ subgroup.data <- c("WNT", "SHH", "Grp3", "Grp4")
 #  options : c("all", "WNT", "SHH", "Grp3", "Grp4")
 
 
-subgroup.include <-  c("SHH", "Grp3", "Grp4")
+subgroup.include <-  c("SHH", "Grp3")
 
 #
 # group of interest: this variable is used to specify whether there is a group of
@@ -64,7 +64,7 @@ subgroup.include <-  c("SHH", "Grp3", "Grp4")
 #
 
 
-group.of.interest <- c("SHH")
+group.of.interest <- c("all")
 
 #
 # In the medullo set there are NOS (No Official Subgroup) samples, these by
@@ -89,7 +89,7 @@ include.nos <- FALSE
 #
 # this should at the minimum be "all, this is searched for and set in the .Rmd to subgroup include 
 
-surv.plots <- list("all")
+surv.plots <- list("all", "SHH", "Grp3")
 
 #
 # Clin Feat specifies which of the clinical features from the annotation files

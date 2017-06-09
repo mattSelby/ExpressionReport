@@ -262,9 +262,21 @@ clin.stats <- list(
 # any number, this takes the data as a percentage
 #
 
-bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
-
+#bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
+bin = "split_25_75"
 }
+
+#
+# Not sure about adding in the ability to split the data into more than one subset
+# or to remove some data e.g. <25% and >75%...will give it a go
+#
+# going to try, not sure how to deifne if it is a quartile/tertile etc. will start with just quartile
+# split indicates that the data is to be split into 3 sets
+# 
+# bin = "split_25_75"
+# outlier indicates that the data will be below and above the two values
+#
+# bin = "outlier_25_75"
 
 
 
@@ -340,7 +352,7 @@ clinical.colours <- c("light salmon","firebrick")
 # KM colours (kaplan meier) set the colours for the two lines on the KM curves
 #
 
-km.colours <- c("red", "blue")
+km.colours <- c("red", "blue", "green")
 
 }
 
