@@ -1,4 +1,70 @@
 #
+#R version 3.4.0 (2017-04-21)
+#Platform: x86_64-pc-linux-gnu (64-bit)
+#Running under: Ubuntu 16.04.2 LTS
+#
+#Matrix products: default
+#BLAS: /usr/lib/libblas/libblas.so.3.6.0
+#LAPACK: /usr/lib/lapack/liblapack.so.3.6.0
+#
+#locale:
+#  [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C               LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    
+#[5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8    LC_PAPER=en_GB.UTF-8       LC_NAME=C                 
+#[9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       #
+#
+#attached base packages:
+#  [1] grid      parallel  stats4    stats     graphics  grDevices utils     datasets  methods   base     
+#
+#other attached packages:
+ # [1] RColorBrewer_1.1-2         scales_0.4.1               survival_2.41-3            Gviz_1.20.0               
+#[5] rtracklayer_1.36.0         minfi_1.22.1               bumphunter_1.16.0          locfit_1.5-9.1            
+#[9] iterators_1.0.8            foreach_1.4.3              Biostrings_2.44.0          XVector_0.16.0            
+#[13] SummarizedExperiment_1.6.1 DelayedArray_0.2.2         matrixStats_0.52.2         GenomicRanges_1.28.1      
+#[17] GenomeInfoDb_1.12.0        reshape2_1.4.2             biomaRt_2.32.0             org.Hs.eg.db_3.4.1        
+#[21] AnnotationDbi_1.38.0       IRanges_2.10.0             S4Vectors_0.14.0           Biobase_2.36.2            
+#[25] BiocGenerics_0.22.0        markdown_0.8               rmarkdown_1.5              xtable_1.8-2              
+#[29] knitr_1.15.1              
+#
+#loaded via a namespace (and not attached):
+#  [1] nlme_3.1-131                  ProtGenerics_1.8.0            bitops_1.0-6                 
+#[4] httr_1.2.1                    rprojroot_1.2                 tools_3.4.0                  
+#[7] backports_1.0.5               doRNG_1.6.6                   nor1mix_1.2-2                
+#[10] R6_2.2.0                      rpart_4.1-11                  Hmisc_4.0-3                  
+#[13] DBI_0.6-1                     lazyeval_0.2.0                colorspace_1.3-2             
+#[16] nnet_7.3-12                   gridExtra_2.2.1               base64_2.0                   
+#[19] compiler_3.4.0                preprocessCore_1.38.1         htmlTable_1.9                
+#[22] pkgmaker_0.22                 checkmate_1.8.2               genefilter_1.58.1            
+#[25] quadprog_1.5-5                stringr_1.2.0                 digest_0.6.12                
+#[28] Rsamtools_1.28.0              foreign_0.8-67                illuminaio_0.18.0            
+#[31] siggenes_1.50.0               GEOquery_2.42.0               dichromat_2.0-0              
+#[34] base64enc_0.1-3               htmltools_0.3.5               ensembldb_2.0.1              
+#[37] BSgenome_1.44.0               limma_3.32.2                  htmlwidgets_0.8              
+#[40] RSQLite_1.1-2                 BiocInstaller_1.26.0          shiny_1.0.0                  
+#[43] mclust_5.2.3                  BiocParallel_1.10.1           acepack_1.4.1                
+#[46] VariantAnnotation_1.22.0      RCurl_1.95-4.8                magrittr_1.5                 
+#[49] GenomeInfoDbData_0.99.0       Formula_1.2-1                 Matrix_1.2-10                
+#[52] Rcpp_0.12.10                  munsell_0.4.3                 stringi_1.1.5                
+#[55] yaml_2.1.14                   MASS_7.3-47                   zlibbioc_1.22.0              
+#[58] AnnotationHub_2.8.1           plyr_1.8.4                    lattice_0.20-35              
+#[61] splines_3.4.0                 multtest_2.32.0               GenomicFeatures_1.28.0       
+#[64] annotate_1.54.0               beanplot_1.2                  rngtools_1.2.4               
+#[67] codetools_0.2-15              XML_3.98-1.7                  evaluate_0.10                
+#[70] biovizBase_1.24.0             latticeExtra_0.6-28           data.table_1.10.4            
+#[73] httpuv_1.3.3                  gtable_0.2.0                  openssl_0.9.6                
+#[76] reshape_0.8.6                 ggplot2_2.2.1                 mime_0.5                     
+#[79] AnnotationFilter_1.0.0        tibble_1.3.0                  GenomicAlignments_1.12.0     
+#[82] registry_0.3                  memoise_1.1.0                 cluster_2.0.6                
+#[85] interactiveDisplayBase_1.14.0
+
+
+
+
+
+
+
+
+
+#
 # The preferences file is used to specify input/plotting data to the report
 # script, it is set to a default that produces reports for all subgroups but can
 # be altered for a more bespoke report
@@ -263,7 +329,7 @@ clin.stats <- list(
 #
 
 #bin <- c("median", "mean","quart.75", "quart.50", "quart.25")
-bin = "split_25_75"
+bin = "median"
 }
 
 #
